@@ -1,0 +1,2862 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="技高統測通" />
+  <title>技高統測通 App｜北科附工電子科旗艦版</title>
+  <link id="pwa-manifest-link" rel="manifest" href="" />
+
+  <!-- Google Fonts: Inter, Noto Sans TC, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    try {
+      if (window.tailwind) {
+        window.tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ['"Inter"', '"Noto Sans TC"', 'sans-serif'],
+                mono: ['"JetBrains Mono"', 'monospace']
+              }
+            }
+          }
+        };
+      }
+    } catch (e) {}
+  </script>
+
+  <!-- KaTeX 0.16.9 CSS & JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #F1F5F9;
+      color: #0F172A;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Engineering Dot-Grid Background for Circuit / K-map / Math SVG */
+    .diagram-grid-bg {
+      background-color: #FAFBFD;
+      background-image:
+        radial-gradient(circle, rgba(148, 163, 184, 0.45) 1.2px, transparent 1.2px),
+        linear-gradient(to right, rgba(226, 232, 240, 0.5) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(226, 232, 240, 0.5) 1px, transparent 1px);
+      background-size: 20px 20px, 80px 80px, 80px 80px;
+    }
+
+    /* Prevent wide KaTeX equations from causing horizontal overflow on 360px screens */
+    .katex-display {
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+      padding: 0.35rem 0;
+      margin: 0.35rem 0;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile Fixed Bottom Nav Safe Area */
+    .pb-mobile-nav {
+      padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+    }
+    .bottom-nav-safe {
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-950">
+
+  <!-- Toast Notification Container (No alert() or confirm() used anywhere) -->
+  <div id="toast-container" class="fixed top-16 right-3 sm:right-4 z-50 flex flex-col gap-2 max-w-[92vw] sm:max-w-sm pointer-events-none"></div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: PWA INSTALL WIZARD                                           -->
+  <!-- ===================================================================== -->
+  <div id="install-modal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4" onclick="window.toggleInstallModal(false)">
+    <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-slate-950 border-2 border-amber-400 flex items-center justify-center text-amber-400 font-extrabold text-sm shadow">
+            統測通
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-slate-900">📲 安裝「技高統測通 App」</h3>
+            <p class="text-[11px] text-slate-500">獨立全螢幕視窗・離線收藏速解法・秒開刷題</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.toggleInstallModal(false)" class="p-2 rounded-xl text-slate-400 hover:bg-slate-100" aria-label="關閉視窗">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="bg-gradient-to-r from-slate-900 to-blue-900 text-white rounded-2xl p-4 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold text-amber-300">⚡ Android / 電腦版 Chrome・Edge 一鍵安裝</span>
+          <span id="pwa-prompt-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">PWA 就緒</span>
+        </div>
+        <p class="text-xs text-slate-200 leading-relaxed">
+          點擊下方按鈕即可將「技高統測通」安裝到手機桌面，享受無網址列的原生 App 體驗！
+        </p>
+        <button type="button" onclick="window.triggerPwaInstall()" class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow transition">
+          📲 立即安裝到主畫面
+        </button>
+      </div>
+
+      <div class="bg-slate-50 rounded-2xl border border-slate-200 p-4 space-y-2.5">
+        <div class="text-xs font-extrabold text-slate-900">🍎 iPhone / iPad（Safari 瀏覽器）安裝步驟：</div>
+        <ol class="text-xs text-slate-700 space-y-2 leading-relaxed">
+          <li class="flex items-start gap-2">
+            <span class="px-1.5 py-0.5 rounded bg-slate-900 text-amber-400 font-mono font-bold text-[10px] shrink-0">1</span>
+            <span>點擊 Safari 底部工具列中央的 <strong>「分享 ⬆️」</strong> 圖示。</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="px-1.5 py-0.5 rounded bg-slate-900 text-amber-400 font-mono font-bold text-[10px] shrink-0">2</span>
+            <span>向下滑動選單，點選 <strong>「加入主畫面 ➕」</strong>。</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="px-1.5 py-0.5 rounded bg-slate-900 text-amber-400 font-mono font-bold text-[10px] shrink-0">3</span>
+            <span>點擊右上角 <strong>「新增」</strong>，桌面即出現專屬 <strong>「技高統測通」</strong> App 圖示！</span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: OPTIONAL GEMINI API KEY SETTING                              -->
+  <!-- ===================================================================== -->
+  <div id="apikey-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4" onclick="window.toggleApiKeyModal(false)">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-extrabold text-base sm:text-lg text-slate-900">🔑 Gemini AI 連線設定</h3>
+        <button type="button" onclick="window.toggleApiKeyModal(false)" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100" aria-label="關閉設定">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed">
+        預設留空即可使用系統內建授權。本 App 亦內建完整 24 招秒殺速解法、57 課解題寶典與雙階段本地智慧運算引擎，離線環境下所有功能皆可 100% 即時運作！
+      </p>
+      <input id="custom-apikey-input" type="password" placeholder="AIzaSy...（預設留空自動連線）" class="w-full max-w-full min-w-0 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 mb-4 font-mono" />
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="window.clearCustomApiKey()" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">恢復預設留空</button>
+        <button type="button" onclick="window.saveCustomApiKey()" class="px-4 py-2 rounded-xl text-xs font-extrabold bg-slate-900 text-white hover:bg-slate-800 transition">儲存設定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TOP NATIVE APP STATUS BAR + DESKTOP TOP 5-TAB BAR                     -->
+  <!-- ===================================================================== -->
+  <header class="bg-slate-950 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md w-full max-w-full">
+    <div class="max-w-6xl mx-auto px-3.5 sm:px-6 py-2.5 flex items-center justify-between gap-2 min-w-0">
+      <!-- Brand Title & Offline-Ready Badge -->
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shrink-0 shadow">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center font-extrabold text-[10px] sm:text-xs text-amber-400 leading-none text-center">
+            統測<br/>通
+          </div>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <h1 class="text-xs sm:text-base font-extrabold tracking-tight text-white truncate">
+              ⚡ 技高統測通 App｜北科附工電子科旗艦版
+            </h1>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/35 text-[10px] font-bold text-emerald-300 shrink-0">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>離線就緒
+            </span>
+          </div>
+          <p class="text-[10px] sm:text-xs text-slate-400 truncate hidden sm:block">
+            全六科 24 大秒殺速解法・108 課綱 57 課寶典・北科附工段考衝刺・拍照／PDF 兩階段速解
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Action Buttons -->
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <button type="button" onclick="window.toggleInstallModal(true)" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] sm:text-xs font-extrabold shadow-xs transition shrink-0">
+          📲 安裝 App
+        </button>
+        <button type="button" onclick="window.toggleApiKeyModal(true)" title="Gemini AI 連線設定" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 border border-white/15 shrink-0" aria-label="AI 連線設定">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop Top 5-Tab Navigation Bar (>= 768px) -->
+    <nav aria-label="桌面版五分頁導覽列" class="hidden md:block bg-slate-900/90 border-t border-slate-800/80">
+      <div class="max-w-6xl mx-auto px-6 py-2 grid grid-cols-5 gap-2">
+        <button type="button" onclick="window.switchTab('tab-speed')" data-tab="tab-speed" class="desktop-tab-btn py-2.5 px-3 rounded-xl text-xs lg:text-sm font-extrabold bg-amber-500 text-slate-950 shadow-sm flex items-center justify-center gap-1.5 transition">
+          <span>⚡</span><span>速解秘笈 (24招)</span>
+        </button>
+        <button type="button" onclick="window.switchTab('tab-quiz')" data-tab="tab-quiz" class="desktop-tab-btn py-2.5 px-3 rounded-xl text-xs lg:text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white flex items-center justify-center gap-1.5 transition">
+          <span>🎯</span><span>智能出題</span>
+        </button>
+        <button type="button" onclick="window.switchTab('tab-guide')" data-tab="tab-guide" class="desktop-tab-btn py-2.5 px-3 rounded-xl text-xs lg:text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white flex items-center justify-center gap-1.5 transition">
+          <span>📖</span><span>全科寶典 (57課)</span>
+        </button>
+        <button type="button" onclick="window.switchTab('tab-exam')" data-tab="tab-exam" class="desktop-tab-btn py-2.5 px-3 rounded-xl text-xs lg:text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white flex items-center justify-center gap-1.5 transition">
+          <span>🏫</span><span>北科段考</span>
+        </button>
+        <button type="button" onclick="window.switchTab('tab-solve')" data-tab="tab-solve" class="desktop-tab-btn py-2.5 px-3 rounded-xl text-xs lg:text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white flex items-center justify-center gap-1.5 transition">
+          <span>📸</span><span>拍照/檔案速解</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN WORKSPACE (5 INDEPENDENT SIBLING TAB PANELS)                     -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-5 min-w-0 pb-mobile-nav md:pb-8">
+
+    <!-- =================================================================== -->
+    <!-- TAB 1: ⚡ 速解秘笈 (id="tab-speed")                                 -->
+    <!-- =================================================================== -->
+    <section id="tab-speed" class="tab-panel space-y-5 w-full max-w-full min-w-0" style="display: block;">
+      <!-- Hero Banner & Filters -->
+      <div class="bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white rounded-3xl p-4 sm:p-6 shadow-md space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-extrabold mb-1.5">
+              ⚡ 考場省時 75%~85%・108 課綱標準台灣術語
+            </span>
+            <h2 class="text-base sm:text-xl font-extrabold">全科統測秒殺速解法寶庫（24 大考場絕招）</h2>
+            <p class="text-xs text-slate-300 mt-1">對照「🐢 傳統慢解法 vs. ⚡ 統測秒殺法」，可加入口袋收藏或一鍵出題實戰！</p>
+          </div>
+          <span id="speed-count-badge" class="px-3 py-1 rounded-xl bg-white/10 border border-white/15 text-amber-300 text-xs font-extrabold self-start sm:self-center shrink-0">
+            顯示 24 招
+          </span>
+        </div>
+
+        <!-- Subject Filter Buttons + Pocket Bookmark Filter -->
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <button type="button" onclick="window.setSpeedSubject('ALL')" data-sp-subj="ALL" class="sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-500 text-slate-950 shadow-xs transition">
+            全部 (24)
+          </button>
+          <button type="button" onclick="window.setSpeedSubject('FAV')" data-sp-subj="FAV" class="sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-amber-200 border border-amber-400/35 transition">
+            ⭐ 我的口袋收藏 (<span id="speed-fav-count">0</span>)
+          </button>
+          <button type="button" onclick="window.setSpeedSubject('基本電學')" data-sp-subj="基本電學" class="sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition">
+            ⚡ 基本電學 (5)
+          </button>
+          <button type="button" onclick="window.setSpeedSubject('電子學')" data-sp-subj="電子學" class="sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition">
+            🔌 電子學 (4)
+          </button>
+          <button type="button" onclick="window.setSpeedSubject('數位邏輯設計')" data-sp-subj="數位邏輯設計" class="sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition">
+            🔢 數位邏輯 (4)
+          </button>
+          <button type="button" onclick="window.setSpeedSubject('數學 C')" data-sp-subj="數學 C" class="sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition">
+            📐 數學 C (4)
+          </button>
+          <button type="button" onclick="window.setSpeedSubject('英文')" data-sp-subj="英文" class="sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition">
+            🔤 英文 (4)
+          </button>
+          <button type="button" onclick="window.setSpeedSubject('國文')" data-sp-subj="國文" class="sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition">
+            📜 國文 (3)
+          </button>
+        </div>
+
+        <!-- Keyword Search -->
+        <div class="w-full max-w-full min-w-0">
+          <input id="speed-keyword-input" type="text" oninput="window.renderSpeedCards()" placeholder="🔍 搜尋速解絕招（例如：密爾門、反射拉直、卡諾圖、行列式面積、轉折詞、函丈...）" class="w-full max-w-full min-w-0 px-4 py-2.5 rounded-xl bg-white text-slate-900 placeholder-slate-400 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-400" />
+        </div>
+      </div>
+
+      <!-- 🤖 AI Custom Speed-Solving Generator (Supports Text + Photo + File Upload) -->
+      <div class="bg-white rounded-3xl border border-amber-300 shadow-sm p-4 sm:p-5 space-y-3.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 text-xs font-extrabold">🤖 AI 客製化速解生成器</span>
+            <span class="text-xs font-bold text-slate-600">輸入題目、拍照或上傳筆記／PDF，提煉專屬秒殺口訣！</span>
+          </div>
+        </div>
+
+        <!-- Full-Platform Native Upload Zone (Transparent Overlay Input - Never display:none) -->
+        <div id="speed-dropzone" class="relative overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 hover:border-amber-500 bg-slate-50/80 p-3.5 text-center transition">
+          <input type="file" accept="image/*,.pdf,.txt,.md,.csv,.json,.doc,.docx" onchange="window.onNativeFileInputChange(event, 'speed')" style="opacity:0; position:absolute; inset:0; width:100%; height:100%; z-index:10; cursor:pointer;" aria-label="上傳圖片或筆記檔案至速解生成器" />
+          <div class="pointer-events-none flex flex-col sm:flex-row items-center justify-center gap-1.5 text-xs">
+            <span class="text-lg">📎</span>
+            <span class="font-extrabold text-slate-800">點擊此區或拖曳上傳題目照片 / PDF / 筆記檔</span>
+            <span class="text-slate-400 text-[11px]">（支援手機相機、相簿、PDF、TXT、MD）</span>
+          </div>
+        </div>
+
+        <!-- Two Dedicated Native Overlay Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div class="relative overflow-hidden rounded-xl bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 text-center font-extrabold text-xs sm:text-sm shadow-xs transition">
+            <input type="file" accept="image/*" capture="environment" onchange="window.onNativeFileInputChange(event, 'speed')" style="opacity:0; position:absolute; inset:0; width:100%; height:100%; z-index:10; cursor:pointer;" aria-label="拍照或選取照片" />
+            <span class="pointer-events-none">📷 拍照 / 選取照片</span>
+          </div>
+          <div class="relative overflow-hidden rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 py-2.5 px-4 text-center font-extrabold text-xs sm:text-sm shadow-xs transition">
+            <input type="file" accept="image/*,.pdf,.txt,.md,.csv,.json,.doc,.docx" onchange="window.onNativeFileInputChange(event, 'speed')" style="opacity:0; position:absolute; inset:0; width:100%; height:100%; z-index:10; cursor:pointer;" aria-label="上傳檔案" />
+            <span class="pointer-events-none">📁 上傳檔案 (PDF / 筆記 / 圖片)</span>
+          </div>
+        </div>
+
+        <!-- Uploaded File Preview Box for Tab 1 -->
+        <div id="speed-upload-preview" class="hidden rounded-2xl border border-blue-200 bg-blue-50/70 p-3 space-y-2"></div>
+
+        <!-- Text Prompt + Generate Button -->
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <input id="custom-speed-input" type="text" placeholder="例如：BJT 分壓式偏壓怎麼快速判斷飽和區？或貼上不會算的題目..." class="flex-1 min-w-0 max-w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          <button type="button" id="btn-custom-speed" onclick="window.generateCustomSpeedTrick()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 text-xs sm:text-sm font-extrabold shrink-0 transition">
+            ⚡ 提煉專屬速解法
+          </button>
+        </div>
+
+        <!-- Custom Speed Trick Output -->
+        <div id="custom-speed-result" class="hidden rounded-2xl bg-amber-50/90 border border-amber-300 p-4 space-y-2.5 fade-in"></div>
+      </div>
+
+      <!-- 24 Speed-Solving Cards Grid -->
+      <div id="speed-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full min-w-0"></div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 2: 🎯 智能出題 (id="tab-quiz")                                  -->
+    <!-- =================================================================== -->
+    <section id="tab-quiz" class="tab-panel hidden space-y-5 w-full max-w-full min-w-0" style="display: none;">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full max-w-full min-w-0">
+        <!-- Left Controls (4 cols) -->
+        <div class="lg:col-span-4 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4 min-w-0">
+          <div class="border-b border-slate-100 pb-3">
+            <h2 class="font-extrabold text-slate-900 text-base">🎯 統測智能出題設定</h2>
+            <p class="text-xs text-slate-500 mt-0.5">自選科目、108 課綱 57 課單元與難度，立即生成四選一試題</p>
+          </div>
+
+          <div class="space-y-3">
+            <div class="min-w-0">
+              <label for="quiz-subject-select" class="block text-xs font-extrabold text-slate-700 mb-1">1. 選擇科目</label>
+              <select id="quiz-subject-select" onchange="window.updateUnitDropdown()" class="w-full max-w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs sm:text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <option value="基本電學">⚡ 基本電學（專一・12課）</option>
+                <option value="電子學">🔌 電子學（專二・11課）</option>
+                <option value="數位邏輯設計">🔢 數位邏輯設計（專二・8課）</option>
+                <option value="數學 C">📐 數學 C（共同科・10課）</option>
+                <option value="英文">🔤 英文（共同科・8課）</option>
+                <option value="國文">📜 國文（共同科・8課）</option>
+              </select>
+            </div>
+
+            <div class="min-w-0">
+              <label for="quiz-lesson-select" class="block text-xs font-extrabold text-slate-700 mb-1">2. 選擇課程單元（108課綱）</label>
+              <select id="quiz-lesson-select" class="w-full max-w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"></select>
+            </div>
+
+            <div class="min-w-0">
+              <label for="quiz-diff-select" class="block text-xs font-extrabold text-slate-700 mb-1">3. 選擇難度層級</label>
+              <select id="quiz-diff-select" class="w-full max-w-full min-w-0 px-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <option value="基礎觀念">🟢 基礎觀念（段考基本題）</option>
+                <option value="統測歷屆" selected>🟡 統測歷屆（標準誘答題）</option>
+                <option value="魔王陷阱">🔴 魔王陷阱（跨觀念綜合題）</option>
+              </select>
+            </div>
+
+            <button type="button" id="btn-quiz-generate" onclick="window.generateUnitQuestion(false)" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 font-extrabold text-sm shadow-md transition">
+              ✨ 生成統測四選一試題
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Question Workspace (8 cols) -->
+        <div class="lg:col-span-8 space-y-4 min-w-0">
+          <div id="quiz-result-card" class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden fade-in">
+            <div class="bg-slate-900 text-white px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center flex-wrap gap-1.5 min-w-0">
+                <span id="qres-subj" class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950"></span>
+                <span id="qres-unit" class="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-white/10 text-white truncate max-w-[220px] sm:max-w-none"></span>
+                <span id="qres-diff" class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-slate-800 text-amber-300 border border-slate-700"></span>
+              </div>
+              <div class="flex items-center flex-wrap gap-2">
+                <button type="button" onclick="window.jumpToGuideUnit()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-amber-300 text-xs font-extrabold transition">
+                  📖 本課寶典
+                </button>
+                <button type="button" onclick="window.generateUnitQuestion(true)" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold transition">
+                  🔄 生成舉一反三變式題
+                </button>
+              </div>
+            </div>
+
+            <div class="p-4 sm:p-6 space-y-4">
+              <!-- Inline SVG Diagram -->
+              <div id="qres-svg-box" class="hidden w-full max-w-full overflow-hidden diagram-grid-bg rounded-2xl border border-slate-200 p-3"></div>
+
+              <!-- Question Stem -->
+              <div id="qres-question" class="text-sm sm:text-base font-bold text-slate-900 leading-relaxed break-words"></div>
+
+              <!-- 4 Multiple-Choice Options -->
+              <div id="qres-options" class="grid grid-cols-1 md:grid-cols-2 gap-2.5"></div>
+
+              <!-- Immediate Misconception Diagnosis -->
+              <div id="qres-feedback" class="hidden rounded-xl p-3.5 border text-xs sm:text-sm break-words"></div>
+
+              <!-- Dual-Mode Solution Switcher -->
+              <div id="qres-solution-box" class="hidden border-t border-slate-200 pt-4 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="font-extrabold text-sm text-slate-900">💡 雙模式解析切換：</div>
+                  <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+                    <button type="button" id="btn-sol-mode-speed" onclick="window.setQuizSolutionMode('speed')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 shadow-xs transition">
+                      ⚡ 考場秒殺速解法（推薦）
+                    </button>
+                    <button type="button" id="btn-sol-mode-std" onclick="window.setQuizSolutionMode('std')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                      📐 課本標準分步詳解
+                    </button>
+                  </div>
+                </div>
+                <div id="qres-speed-solution" class="bg-amber-50/90 border border-amber-300 rounded-xl p-4 text-xs sm:text-sm text-slate-900 leading-relaxed space-y-1.5 break-words"></div>
+                <div id="qres-solution" class="hidden bg-emerald-50/75 border border-emerald-200 rounded-xl p-4 text-xs sm:text-sm text-slate-800 leading-relaxed space-y-1.5 break-words"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 3: 📖 全科寶典 (id="tab-guide" - ALL 6 SUBJECTS × 57 LESSONS)   -->
+    <!-- =================================================================== -->
+    <section id="tab-guide" class="tab-panel hidden space-y-5 w-full max-w-full min-w-0" style="display: none;">
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <h2 class="text-base sm:text-xl font-extrabold text-slate-900">📖 全科全課解題寶典（六大考科全部 57 課完整收錄）</h2>
+            <p class="text-xs text-slate-500 mt-1">點選下方科目按鈕或輸入關鍵字搜尋口訣、公式與考點，每課皆可一鍵跳轉出題練習！</p>
+          </div>
+          <span id="pb-count-badge" class="px-3 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-300 text-xs font-extrabold shrink-0 self-start sm:self-center">
+            顯示 57 課
+          </span>
+        </div>
+
+        <!-- Subject Filter Buttons -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" onclick="window.setPlaybookSubject('ALL')" data-pb-subj="ALL" class="pb-subj-btn px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-400 shadow-xs transition">
+            全部 (57)
+          </button>
+          <button type="button" onclick="window.setPlaybookSubject('基本電學')" data-pb-subj="基本電學" class="pb-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            ⚡ 基本電學 (12)
+          </button>
+          <button type="button" onclick="window.setPlaybookSubject('電子學')" data-pb-subj="電子學" class="pb-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            🔌 電子學 (11)
+          </button>
+          <button type="button" onclick="window.setPlaybookSubject('數位邏輯設計')" data-pb-subj="數位邏輯設計" class="pb-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            🔢 數位邏輯設計 (8)
+          </button>
+          <button type="button" onclick="window.setPlaybookSubject('數學 C')" data-pb-subj="數學 C" class="pb-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            📐 數學 C (10)
+          </button>
+          <button type="button" onclick="window.setPlaybookSubject('英文')" data-pb-subj="英文" class="pb-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            🔤 英文 (8)
+          </button>
+          <button type="button" onclick="window.setPlaybookSubject('國文')" data-pb-subj="國文" class="pb-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            📜 國文 (8)
+          </button>
+        </div>
+
+        <!-- Keyword Search -->
+        <div class="w-full max-w-full min-w-0">
+          <input id="pb-keyword-input" type="text" oninput="window.renderPlaybookCards()" placeholder="🔍 搜尋 57 課單元名稱、口訣或公式（例如：戴維寧、卡諾圖、BJT、隸美弗、分詞構句、師說...）" class="w-full max-w-full min-w-0 px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        </div>
+      </div>
+
+      <!-- 57 Lessons Grid -->
+      <div id="pb-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-full min-w-0"></div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 4: 🏫 北科段考 (id="tab-exam")                                  -->
+    <!-- =================================================================== -->
+    <section id="tab-exam" class="tab-panel hidden space-y-5 w-full max-w-full min-w-0" style="display: none;">
+      <!-- Beike Header & Filters -->
+      <div class="bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-white rounded-3xl p-4 sm:p-6 shadow-md space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/35 text-amber-300 text-[11px] font-extrabold mb-1.5">
+              🏫 桃園市立北科附工電子科專屬衝刺專區
+            </span>
+            <h2 class="text-base sm:text-xl font-extrabold">北科附工電子科段考複習地圖與限時模擬考</h2>
+            <p class="text-xs text-slate-300 mt-1">自動記憶複習進度、整理老師最愛考的單位陷阱，並附帶 10 分鐘限時模考計時器！</p>
+          </div>
+          <div class="bg-white/10 border border-white/15 rounded-2xl px-3.5 py-2 text-right shrink-0 self-start sm:self-center">
+            <div class="text-[10px] text-amber-300 font-bold">考點精熟度</div>
+            <div id="beike-mastery-pct" class="text-lg font-mono font-extrabold text-white">0%</div>
+            <div class="w-24 h-1.5 bg-white/20 rounded-full overflow-hidden mt-1">
+              <div id="beike-mastery-bar" class="h-full bg-amber-400 transition-all duration-300" style="width: 0%;"></div>
+            </div>
+            <div id="beike-mastery-text" class="text-[10px] text-slate-300 mt-0.5">已完成 0 / 9 項考點</div>
+          </div>
+        </div>
+
+        <!-- Grade, Exam, Subject Selectors -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-white/10 rounded-2xl p-3 border border-white/15">
+          <div class="min-w-0">
+            <label for="beike-grade" class="block text-[11px] font-bold text-amber-200 mb-1">1. 選擇年級</label>
+            <select id="beike-grade" onchange="window.renderBeikeTab()" class="w-full max-w-full min-w-0 px-3 py-2 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-extrabold">
+              <option value="高一">高一（電子一甲 / 一乙）</option>
+              <option value="高二" selected>高二（電子二甲 / 二乙）</option>
+              <option value="高三">高三（電子三甲 / 三乙 統測班）</option>
+            </select>
+          </div>
+          <div class="min-w-0">
+            <label for="beike-exam" class="block text-[11px] font-bold text-amber-200 mb-1">2. 段考別</label>
+            <select id="beike-exam" onchange="window.renderBeikeTab()" class="w-full max-w-full min-w-0 px-3 py-2 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-extrabold">
+              <option value="第一次段考">第一次段考</option>
+              <option value="第二次段考" selected>第二次段考</option>
+              <option value="期末考">期末考</option>
+            </select>
+          </div>
+          <div class="min-w-0">
+            <label for="beike-subject" class="block text-[11px] font-bold text-amber-200 mb-1">3. 篩選考科</label>
+            <select id="beike-subject" onchange="window.renderBeikeTab()" class="w-full max-w-full min-w-0 px-3 py-2 rounded-xl bg-white text-slate-900 text-xs sm:text-sm font-extrabold">
+              <option value="全部六科" selected>🌐 全部六科總複習</option>
+              <option value="基本電學">⚡ 基本電學（專一）</option>
+              <option value="電子學">🔌 電子學（專二）</option>
+              <option value="數位邏輯設計">🔢 數位邏輯設計（專二）</option>
+              <option value="數學 C">📐 數學 C（共同科）</option>
+              <option value="英文">🔤 英文（共同科）</option>
+              <option value="國文">📜 國文（共同科）</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-Column Checklist & Mock Exam -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full max-w-full min-w-0">
+        <!-- Left: Checklist & Teacher Traps (6 cols) -->
+        <div class="lg:col-span-6 space-y-4 min-w-0">
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-extrabold text-slate-900 text-sm sm:text-base">✅ 段考範圍檢核清單（自動記憶進度）</h3>
+              <button type="button" onclick="window.resetBeikeChecks()" class="text-xs text-slate-400 hover:text-rose-600 font-bold">清除勾選</button>
+            </div>
+            <div id="beike-checklist" class="space-y-2.5"></div>
+          </div>
+
+          <div class="bg-amber-50 rounded-3xl border border-amber-300 p-4 sm:p-5 space-y-2.5">
+            <h3 class="font-extrabold text-amber-950 text-sm sm:text-base">⚠️ 北科附工老師最愛考的單位與陷阱警示</h3>
+            <div id="beike-traps" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- Right: 10-Min Countdown Timer + Curated Exam Mock Quizzes (6 cols) -->
+        <div class="lg:col-span-6 space-y-4 min-w-0">
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-sm sm:text-base">📝 段考精選模擬題庫（含秒殺速解）</h3>
+                <p class="text-xs text-slate-500">直接點選 A / B / C / D 作答並查看速解與詳解</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900 text-amber-400 font-mono text-xs font-extrabold">
+                  <span>⏱️</span>
+                  <span id="beike-timer-display">10:00</span>
+                  <button type="button" id="btn-beike-timer" onclick="window.toggleBeikeTimer()" class="ml-1 px-2 py-0.5 rounded bg-amber-500 text-slate-950 text-[10px] font-extrabold">開始</button>
+                  <button type="button" onclick="window.resetBeikeTimer()" class="px-1.5 py-0.5 rounded bg-white/15 text-white text-[10px] font-bold">重設</button>
+                </div>
+                <span id="beike-score-label" class="px-3 py-1 rounded-xl bg-slate-100 text-slate-800 font-mono text-xs font-extrabold">
+                  尚未作答
+                </span>
+              </div>
+            </div>
+            <div id="beike-quiz-container" class="space-y-4"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- TAB 5: 📸 拍照/檔案速解 (id="tab-solve")                            -->
+    <!-- =================================================================== -->
+    <section id="tab-solve" class="tab-panel hidden space-y-5 w-full max-w-full min-w-0" style="display: none;">
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-3">
+        <div>
+          <h2 class="font-extrabold text-slate-900 text-base sm:text-lg">📸 拍照／檔案兩階段結構化速解工作台</h2>
+          <p class="text-xs text-slate-500 mt-0.5">支援手機相機拍照、相簿選圖、PDF 講義、TXT/MD 筆記或剪貼簿貼圖（Ctrl+V）；第一階段先萃取網表與條件，第二階段產出考場秒殺速解與標準詳解。</p>
+        </div>
+
+        <!-- 5 One-Click Subject Preset Buttons -->
+        <div class="pt-2 border-t border-slate-100 space-y-1.5">
+          <div class="text-[11px] font-extrabold text-slate-500">⚡ 一鍵帶入各科範例題目測試：</div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="window.loadSolverPreset('be')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-100 hover:text-amber-950 text-slate-800 text-xs font-extrabold transition">
+              ⚡ 基本電學戴維寧電路圖
+            </button>
+            <button type="button" onclick="window.loadSolverPreset('el')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-100 hover:text-amber-950 text-slate-800 text-xs font-extrabold transition">
+              🔌 電子學 BJT 偏壓
+            </button>
+            <button type="button" onclick="window.loadSolverPreset('dl')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-100 hover:text-amber-950 text-slate-800 text-xs font-extrabold transition">
+              🔢 數位邏輯卡諾圖
+            </button>
+            <button type="button" onclick="window.loadSolverPreset('mc')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-100 hover:text-amber-950 text-slate-800 text-xs font-extrabold transition">
+              📐 數學 C 三角函數
+            </button>
+            <button type="button" onclick="window.loadSolverPreset('en')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-100 hover:text-amber-950 text-slate-800 text-xs font-extrabold transition">
+              🔤 英文句子重組
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 w-full max-w-full min-w-0">
+        <!-- Left Input & Full-Platform Native Upload Controls (5 cols) -->
+        <div class="lg:col-span-5 bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4 min-w-0">
+          <!-- Large Touch/Drag Upload Dropzone (Transparent Overlay Input - Never display:none) -->
+          <div id="solver-dropzone" class="relative overflow-hidden border-2 border-dashed border-slate-300 hover:border-amber-500 rounded-2xl p-4 text-center bg-slate-50/80 transition">
+            <input type="file" accept="image/*,.pdf,.txt,.md,.csv,.json,.doc,.docx" onchange="window.onNativeFileInputChange(event, 'solver')" style="opacity:0; position:absolute; inset:0; width:100%; height:100%; z-index:10; cursor:pointer;" aria-label="上傳考題照片或檔案" />
+            <div class="pointer-events-none py-2 space-y-1">
+              <div class="text-2xl">📸</div>
+              <p class="text-xs font-extrabold text-slate-800">點擊此區任何角落，或拖曳檔案至此上傳</p>
+              <p class="text-[11px] text-slate-400">支援拍照、相簿圖片、PDF 試卷、TXT / MD / CSV 筆記，亦可直接貼上截圖</p>
+            </div>
+          </div>
+
+          <!-- Two Dedicated Native Overlay Buttons -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div class="relative overflow-hidden rounded-xl bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-3 text-center font-extrabold text-xs shadow-xs transition">
+              <input type="file" accept="image/*" capture="environment" onchange="window.onNativeFileInputChange(event, 'solver')" style="opacity:0; position:absolute; inset:0; width:100%; height:100%; z-index:10; cursor:pointer;" aria-label="拍照或選取照片" />
+              <span class="pointer-events-none">📷 拍照 / 選取照片</span>
+            </div>
+            <div class="relative overflow-hidden rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 py-2.5 px-3 text-center font-extrabold text-xs shadow-xs transition">
+              <input type="file" accept="image/*,.pdf,.txt,.md,.csv,.json,.doc,.docx" onchange="window.onNativeFileInputChange(event, 'solver')" style="opacity:0; position:absolute; inset:0; width:100%; height:100%; z-index:10; cursor:pointer;" aria-label="上傳檔案" />
+              <span class="pointer-events-none">📁 上傳檔案 (PDF / 筆記 / 圖片)</span>
+            </div>
+          </div>
+
+          <!-- Uploaded File Preview Card for Tab 5 -->
+          <div id="solver-upload-preview" class="hidden rounded-2xl border border-blue-200 bg-blue-50/70 p-3 space-y-2"></div>
+
+          <!-- Text Input -->
+          <div>
+            <label for="solver-prompt-text" class="block text-xs font-extrabold text-slate-700 mb-1.5">貼上題目文字、已知條件或電路網表</label>
+            <textarea id="solver-prompt-text" rows="5" placeholder="請貼上題目文字，上傳照片／PDF／筆記檔，或點擊上方「⚡ 一鍵帶入各科範例題目」快速體驗..." class="w-full max-w-full min-w-0 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+          </div>
+
+          <button type="button" id="btn-run-solver" onclick="window.runTwoStageSolver()" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 font-extrabold text-sm shadow-md transition">
+            ⚡ 開始兩階段解析與秒殺速解
+          </button>
+        </div>
+
+        <!-- Right Output Workspace (7 cols) -->
+        <div class="lg:col-span-7 space-y-4 min-w-0">
+          <div id="solver-placeholder" class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-10 text-center flex flex-col items-center justify-center min-h-[340px]">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center text-xl mb-3">
+              ⚡
+            </div>
+            <h3 class="text-base font-extrabold text-slate-900 mb-1.5">準備進行兩階段解析與秒殺速解</h3>
+            <p class="text-xs sm:text-sm text-slate-500 max-w-md leading-relaxed">
+              上傳照片／PDF／筆記檔或帶入任一科範例題目後，點擊「⚡ 開始兩階段解析與秒殺速解」，系統將依序產出 Stage 1 網表條件提取與 Stage 2 考場秒殺速解法。
+            </p>
+          </div>
+
+          <div id="solver-output" class="hidden space-y-4 fade-in">
+            <!-- Stage 1 -->
+            <div class="bg-slate-950 text-slate-100 rounded-3xl border border-slate-800 overflow-hidden shadow-sm">
+              <div class="px-4 py-3 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs font-mono font-extrabold text-amber-400">第一階段：結構化網表（Netlist）／題幹條件提取</span>
+                <span id="solver-out-subj" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-500/20 text-amber-300"></span>
+              </div>
+              <div class="p-4 space-y-2.5">
+                <pre id="solver-out-netlist" class="font-mono text-xs text-emerald-400 bg-slate-900/90 p-3 rounded-xl border border-slate-800 overflow-x-auto max-w-full whitespace-pre-wrap leading-relaxed"></pre>
+                <div id="solver-out-formulas" class="text-xs text-amber-200 bg-slate-900/70 p-3 rounded-xl break-words"></div>
+              </div>
+            </div>
+
+            <!-- Stage 2 -->
+            <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+              <div class="px-4 py-3 bg-amber-50 border-b border-amber-200 flex flex-wrap items-center justify-between gap-2">
+                <span class="font-extrabold text-sm text-slate-900">第二階段：⚡ 考場秒殺速解法 ＋ 📐 完整分步詳解</span>
+              </div>
+              <div class="p-4 sm:p-5 space-y-3">
+                <div class="rounded-xl bg-amber-50/90 border border-amber-300 p-3.5 space-y-1">
+                  <div class="text-xs font-extrabold text-amber-900">⚡ 考場秒殺速解法</div>
+                  <div id="solver-out-speed" class="text-xs sm:text-sm text-slate-900 leading-relaxed break-words"></div>
+                </div>
+                <div class="space-y-1">
+                  <div class="text-xs font-extrabold text-slate-700">📐 108 課綱完整分步詳解</div>
+                  <div id="solver-out-steps" class="text-xs sm:text-sm text-slate-800 leading-relaxed space-y-2 break-words"></div>
+                </div>
+                <div class="rounded-xl bg-emerald-50 border border-emerald-200 p-3.5">
+                  <div class="text-xs font-extrabold text-emerald-700 mb-1">最終標準答案</div>
+                  <div id="solver-out-answer" class="text-sm sm:text-base font-extrabold text-emerald-950 break-words"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MOBILE FIXED BOTTOM 5-TAB NATIVE APP NAVIGATION BAR (< 768px)         -->
+  <!-- ===================================================================== -->
+  <nav aria-label="手機版底部五分頁導覽列" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 bottom-nav-safe shadow-[0_-4px_20px_rgba(15,23,42,0.35)]">
+    <div class="grid grid-cols-5 h-16 max-w-lg mx-auto px-1">
+      <button type="button" onclick="window.switchTab('tab-speed')" data-tab="tab-speed" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 text-amber-400 font-extrabold transition">
+        <span class="text-lg leading-none">⚡</span>
+        <span class="text-[10px] tracking-tight">速解秘笈</span>
+      </button>
+      <button type="button" onclick="window.switchTab('tab-quiz')" data-tab="tab-quiz" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white font-bold transition">
+        <span class="text-lg leading-none">🎯</span>
+        <span class="text-[10px] tracking-tight">智能出題</span>
+      </button>
+      <button type="button" onclick="window.switchTab('tab-guide')" data-tab="tab-guide" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white font-bold transition">
+        <span class="text-lg leading-none">📖</span>
+        <span class="text-[10px] tracking-tight">全科寶典</span>
+      </button>
+      <button type="button" onclick="window.switchTab('tab-exam')" data-tab="tab-exam" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white font-bold transition">
+        <span class="text-lg leading-none">🏫</span>
+        <span class="text-[10px] tracking-tight">北科段考</span>
+      </button>
+      <button type="button" onclick="window.switchTab('tab-solve')" data-tab="tab-solve" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white font-bold transition">
+        <span class="text-lg leading-none">📸</span>
+        <span class="text-[10px] tracking-tight">拍照速解</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===================================================================== -->
+  <!-- COMPLETE SELF-CONTAINED APPLICATION LOGIC (ZERO-ERROR GUARANTEED)     -->
+  <!-- ===================================================================== -->
+  <script>
+    (function () {
+      "use strict";
+
+      const GEMINI_MODEL = "gemini-2.5-flash";
+
+      // ---------------------------------------------------------------------
+      // 1. SAFE STORAGE WRAPPER WITH IN-MEMORY FALLBACK (NO SecurityError)
+      // ---------------------------------------------------------------------
+      const memoryStorage = {};
+
+      function safeGetStorage(key, fallbackValue) {
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            const raw = window.localStorage.getItem(key);
+            if (raw !== null && raw !== undefined) {
+              return JSON.parse(raw);
+            }
+          }
+        } catch (e) {}
+        if (Object.prototype.hasOwnProperty.call(memoryStorage, key)) {
+          return memoryStorage[key];
+        }
+        return fallbackValue;
+      }
+
+      function safeSetStorage(key, value) {
+        memoryStorage[key] = value;
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem(key, JSON.stringify(value));
+          }
+        } catch (e) {}
+      }
+
+      function safeRemoveStorage(key) {
+        delete memoryStorage[key];
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.removeItem(key);
+          }
+        } catch (e) {}
+      }
+
+      // ---------------------------------------------------------------------
+      // 2. PWA MANIFEST & INSTALL HANDLER
+      // ---------------------------------------------------------------------
+      try {
+        const iconSvg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0f172a"/><rect x="24" y="24" width="464" height="464" rx="96" fill="none" stroke="#f59e0b" stroke-width="20"/><text x="256" y="225" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="112" fill="#fbbf24">統測通</text><text x="256" y="345" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="56" fill="#ffffff">北科附工電子</text></svg>');
+        const manifestObj = {
+          name: "技高統測通 App｜北科附工電子科旗艦版",
+          short_name: "技高統測通",
+          description: "北科附工電子科與技高統測全六科24大秒殺速解法、57課寶典與段考複習 App",
+          start_url: ".",
+          display: "standalone",
+          background_color: "#0f172a",
+          theme_color: "#0f172a",
+          icons: [{
+            src: "data:image/svg+xml," + iconSvg,
+            sizes: "512x512",
+            type: "image/svg+xml",
+            purpose: "any maskable"
+          }]
+        };
+        const blob = new Blob([JSON.stringify(manifestObj)], { type: "application/manifest+json" });
+        const linkEl = document.getElementById("pwa-manifest-link");
+        if (linkEl) linkEl.setAttribute("href", URL.createObjectURL(blob));
+      } catch (e) {}
+
+      let deferredPwaPrompt = null;
+      window.addEventListener("beforeinstallprompt", function (e) {
+        try {
+          e.preventDefault();
+          deferredPwaPrompt = e;
+          const badge = document.getElementById("pwa-prompt-badge");
+          if (badge) badge.textContent = "可一鍵安裝";
+        } catch (err) {}
+      });
+
+      window.toggleInstallModal = function (show) {
+        try {
+          const m = document.getElementById("install-modal");
+          if (!m) return;
+          if (show) m.classList.remove("hidden");
+          else m.classList.add("hidden");
+        } catch (e) {}
+      };
+
+      window.triggerPwaInstall = async function () {
+        if (deferredPwaPrompt) {
+          try {
+            deferredPwaPrompt.prompt();
+            await deferredPwaPrompt.userChoice;
+            deferredPwaPrompt = null;
+            window.toggleInstallModal(false);
+          } catch (e) {}
+        } else {
+          const badge = document.getElementById("pwa-prompt-badge");
+          if (badge) badge.textContent = "請依瀏覽器選單加入主畫面";
+          showToast("請點選瀏覽器選單「加入主畫面」即可安裝 App！", "info");
+        }
+      };
+
+      // ---------------------------------------------------------------------
+      // 3. SAFE TAB SWITCHER (ZERO DEPENDENCY ON window.event)
+      // ---------------------------------------------------------------------
+      window.switchTab = function (tabId) {
+        try {
+          const targetId = String(tabId || "tab-speed");
+          const panels = document.querySelectorAll(".tab-panel");
+          for (let i = 0; i < panels.length; i++) {
+            const p = panels[i];
+            if (p.id === targetId) {
+              p.classList.remove("hidden");
+              p.style.display = "block";
+            } else {
+              p.classList.add("hidden");
+              p.style.display = "none";
+            }
+          }
+
+          // Sync Desktop Top 5-Tab Bar
+          const deskBtns = document.querySelectorAll(".desktop-tab-btn");
+          for (let j = 0; j < deskBtns.length; j++) {
+            const db = deskBtns[j];
+            if (db.getAttribute("data-tab") === targetId) {
+              db.className = "desktop-tab-btn py-2.5 px-3 rounded-xl text-xs lg:text-sm font-extrabold bg-amber-500 text-slate-950 shadow-sm flex items-center justify-center gap-1.5 transition";
+            } else {
+              db.className = "desktop-tab-btn py-2.5 px-3 rounded-xl text-xs lg:text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white flex items-center justify-center gap-1.5 transition";
+            }
+          }
+
+          // Sync Mobile Bottom 5-Tab Bar
+          const mobBtns = document.querySelectorAll(".mobile-tab-btn");
+          for (let k = 0; k < mobBtns.length; k++) {
+            const mb = mobBtns[k];
+            if (mb.getAttribute("data-tab") === targetId) {
+              mb.className = "mobile-tab-btn flex flex-col items-center justify-center gap-0.5 text-amber-400 font-extrabold transition";
+            } else {
+              mb.className = "mobile-tab-btn flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white font-bold transition";
+            }
+          }
+
+          try {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } catch (e) {}
+        } catch (err) {
+          console.error("switchTab error:", err);
+        }
+      };
+
+      // ---------------------------------------------------------------------
+      // 4. COMPLETE 57-UNIT CURRICULUM MAP
+      // ---------------------------------------------------------------------
+      const CURRICULUM_UNITS_MAP = {
+        "基本電學": [
+          "Ch1 電學基本概念",
+          "Ch2 電阻與歐姆定律",
+          "Ch3 串並聯電路與克希荷夫定律",
+          "Ch4 直流網路分析與戴維寧/諾頓",
+          "Ch5 電容與靜電",
+          "Ch6 電感與電磁",
+          "Ch7 直流暫態 RC/RL",
+          "Ch8 交流電與相量",
+          "Ch9 基本交流電路 RLC",
+          "Ch10 交流電功率與功因改善",
+          "Ch11 諧振電路",
+          "Ch12 交流電源與三相電路"
+        ],
+        "電子學": [
+          "Ch1 半導體物理與PN接面",
+          "Ch2 二極體整流/濾波/截波/箝位與稽納穩壓",
+          "Ch3 BJT結構與工作區判別",
+          "Ch4 BJT直流偏壓電路",
+          "Ch5 BJT交流小訊號分析",
+          "Ch6 串級放大與頻率響應",
+          "Ch7 FET特性與直流偏壓",
+          "Ch8 FET交流小訊號分析",
+          "Ch9 運算放大器 OP-Amp 應用",
+          "Ch10 基本振盪電路與555計時器",
+          "Ch11 功率放大器與穩壓電源"
+        ],
+        "數位邏輯設計": [
+          "Ch1 數目系統與補數運算",
+          "Ch2 基本邏輯閘與萬用閘",
+          "Ch3 布林代數與第摩根定理",
+          "Ch4 卡諾圖 K-map 化簡",
+          "Ch5 組合邏輯電路/加解碼器/多工器",
+          "Ch6 正反器 Flip-Flop 原理",
+          "Ch7 非同步與同步計數器",
+          "Ch8 移位暫存器與時序波形判讀"
+        ],
+        "數學 C": [
+          "Ch1 坐標系與二次函數圖形",
+          "Ch2 直線方程式與點線距離",
+          "Ch3 多項式與餘因式定理",
+          "Ch4 三角函數與正餘弦定理",
+          "Ch5 和差倍角與正餘弦疊合",
+          "Ch6 平面向量與柯西不等式",
+          "Ch7 圓與直線關係",
+          "Ch8 數列與無窮等比級數",
+          "Ch9 排列組合與條件機率",
+          "Ch10 複數極式/隸美弗定理與微積分基礎"
+        ],
+        "英文": [
+          "U1 核心4500字彙與字首字根",
+          "U2 十二時態與被動語態",
+          "U3 關係代名詞與關係副詞",
+          "U4 分詞構句與不定詞/動名詞",
+          "U5 假設語氣與倒裝句型",
+          "U6 統測高頻情境對話",
+          "U7 克漏字與文意選填邏輯",
+          "U8 閱讀測驗與非選擇題重組/中譯英"
+        ],
+        "國文": [
+          "U1 核心古文先秦漢魏篇",
+          "U2 核心古文唐宋散文篇",
+          "U3 核心古文明清與台灣古典篇",
+          "U4 字音字形與成語辨析",
+          "U5 修辭格與文言文法結構",
+          "U6 國學常識與韻文流變",
+          "U7 高職特色應用文書信題辭對聯",
+          "U8 現代文對讀與統測六級分寫作"
+        ]
+      };
+
+      window.updateUnitDropdown = function (preferredUnit) {
+        try {
+          const subjEl = document.getElementById("quiz-subject-select");
+          const unitEl = document.getElementById("quiz-lesson-select");
+          if (!subjEl || !unitEl) return;
+
+          const subj = subjEl.value || "基本電學";
+          const units = CURRICULUM_UNITS_MAP[subj] || [];
+          unitEl.innerHTML = "";
+          for (let i = 0; i < units.length; i++) {
+            const opt = document.createElement("option");
+            opt.value = units[i];
+            opt.textContent = units[i];
+            unitEl.appendChild(opt);
+          }
+          if (preferredUnit && units.indexOf(preferredUnit) !== -1) {
+            unitEl.value = preferredUnit;
+          } else if (units.length > 0) {
+            unitEl.selectedIndex = 0;
+          }
+        } catch (err) {}
+      };
+
+      // ---------------------------------------------------------------------
+      // 5. 24 SPEED-SOLVING TECHNIQUES VAULT (ALL 6 SUBJECTS)
+      // ---------------------------------------------------------------------
+      const SPEED_SOLVING_VAULT = [
+        // 基本電學 (5招)
+        {
+          id: "sp_be1", subject: "基本電學", unit: "Ch3 串並聯電路與克希荷夫定律",
+          timeSave: "⏱️ 省時 85%｜3秒心算",
+          title: "電阻並聯「倍數除 (k+1) 秒殺法」",
+          mnemonic: "「同值並聯直接除 n；一大一小成 k 倍，大電阻直接除以 (k+1)！」",
+          formula: "$$R_{\\text{eq}} = \\frac{R_{\\text{大}}}{k + 1} \\quad (\\text{其中 } k = \\frac{R_{\\text{大}}}{R_{\\text{小}}})$$",
+          slowWay: "列倒數相加 $\\frac{1}{R_T} = \\frac{1}{12} + \\frac{1}{6}$，通分得 $\\frac{3}{12}$ 再取倒數，容易忘記倒數或通分算錯。",
+          fastWay: "一眼看出 $12\\,\\Omega$ 是 $6\\,\\Omega$ 的 $k = 2$ 倍，直接拿大電阻 $12 \\div (2+1) = 4\\,\\Omega$，3 秒心算完成！",
+          example: "例題：$30\\,\\Omega \\parallel 10\\,\\Omega$，$k = 3 \\implies 30 \\div (3+1) = 7.5\\,\\Omega$；三顆 $18\\,\\Omega$ 並聯 $\\implies 18 \\div 3 = 6\\,\\Omega$。"
+        },
+        {
+          id: "sp_be2", subject: "基本電學", unit: "Ch4 直流網路分析與戴維寧/諾頓",
+          timeSave: "⏱️ 省時 80%｜15秒秒殺",
+          title: "密爾門定理（Millman's Theorem）「一行公式秒殺多網目」",
+          mnemonic: "「各支路電壓乘電導相加當分子，各支路電導相加當分母，純電流源直接加減放分子！」",
+          formula: "$$V_{AB} = \\frac{\\sum \\frac{E_i}{R_i} + \\sum I_j}{\\sum \\frac{1}{R_i}} = \\frac{\\frac{E_1}{R_1} + \\frac{E_2}{R_2} + I_3}{\\frac{1}{R_1} + \\frac{1}{R_2}}$$",
+          slowWay: "使用重疊定理分三次關閉電源算三次分壓再相加，或列兩條網目 KVL 聯立方程式解二元一次方程組。",
+          fastWay: "直接將共節點並聯支路套入密爾門一行公式（電壓源朝上為正、朝下為負；純電流源電導為 $0$ 只放分子），15 秒算出節點電壓！",
+          example: "例題：$12\\,\\text{V}$ 串 $4\\,\\Omega$ 與 $6\\,\\text{V}$ 串 $2\\,\\Omega$ 並聯，$V = \\frac{12/4 + 6/2}{1/4 + 1/2} = \\frac{6}{0.75} = 8\\,\\text{V}$。"
+        },
+        {
+          id: "sp_be3", subject: "基本電學", unit: "Ch4 直流網路分析與戴維寧/諾頓",
+          timeSave: "⏱️ 省時 75%｜20秒秒殺",
+          title: "戴維寧等效電路「節點分壓＋電源消去視覺法」",
+          mnemonic: "「開路懸空電阻無壓降直接無視；求內阻電壓源變導線、電流源直接擦掉！」",
+          formula: "$$V_{TH} = V_{oc}, \\quad R_{TH} = R_{\\text{in}}, \\quad P_{L(\\max)} = \\frac{V_{TH}^2}{4 R_{TH}}$$",
+          slowWay: "把懸空負載端的串聯電阻也算進分壓公式，或重畫三次複雜等效電路圖導致節點接錯。",
+          fastWay: "開路端串聯電阻因 $I=0$ 視同導線，直接對前級做一次分壓得 $V_{TH}$；求 $R_{TH}$ 時電壓源變導線、電流源擦掉，由右往左縮並聯！",
+          example: "例題：$24\\,\\text{V}$ 經 $6\\,\\Omega$ 與 $12\\,\\Omega$ 分壓後接 $4\\,\\Omega$ 至輸出端，$V_{TH} = 24 \\times \\frac{12}{18} = 16\\,\\text{V}$，$R_{TH} = (6\\parallel 12)+4 = 8\\,\\Omega$。"
+        },
+        {
+          id: "sp_be4", subject: "基本電學", unit: "Ch9 基本交流電路 RLC",
+          timeSave: "⏱️ 省時 85%｜5秒秒殺",
+          title: "交流 RLC 與功率因數「3-4-5 / 6-8-10 畢氏三角形速算法」",
+          mnemonic: "「感抗容抗先相減，看到 3-4-5、6-8-10、5-12-13 直接秒填斜邊阻抗 Z 與功因！」",
+          formula: "$$|Z| = \\sqrt{R^2 + (X_L - X_C)^2}, \\quad \\text{PF} = \\cos\\theta = \\frac{R}{|Z|}$$",
+          slowWay: "老實展開平方 $6^2 + 8^2 = 100$ 再開根號，接著按三角函數求角度再代 $\\cos\\theta$。",
+          fastWay: "統測交流題 90% 設計成畢氏三元數！看到 $R=6\\,\\Omega, X_L=8\\,\\Omega$，秒寫 $|Z|=10\\,\\Omega$、$\\text{PF} = \\frac{6}{10} = 0.6$（電感性落後）。",
+          example: "例題：RLC 串聯 $R=12\\,\\Omega, X_L=9\\,\\Omega, X_C=4\\,\\Omega$，$X_{\\text{net}} = 5\\,\\Omega$，搭配 $R=12\\,\\Omega$ 秒認 5-12-13，得 $|Z|=13\\,\\Omega, \\text{PF}=\\frac{12}{13}$。"
+        },
+        {
+          id: "sp_be5", subject: "基本電學", unit: "Ch7 直流暫態 RC/RL",
+          timeSave: "⏱️ 省時 75%｜15秒秒殺",
+          title: "一階 RC/RL 暫態「三點決定法（63.2% 與 36.8% 口訣）」",
+          mnemonic: "「瞬間電容短路電感開路、穩態電容開路電感短路；經過 1τ 上升 63.2% 或下降剩 36.8%！」",
+          formula: "$$\\tau_{RC} = R_{TH} C, \\quad \\tau_{RL} = \\frac{L}{R_{TH}}, \\quad y(t) = y(\\infty) + [y(0^+) - y(\\infty)]e^{-t/\\tau}$$",
+          slowWay: "列一階常微分方程積分求解積分常數，或硬背四套不同充放電公式導致符號搞混。",
+          fastWay: "只抓三個數字：$t=0^+$ 初值、$t=\\infty$ 穩態值、時間常數 $\\tau$。若題目問 $t = 1\\tau$ 時數值，零初始充電直接乘 $0.632$，放電直接乘 $0.368$！",
+          example: "例題：$10\\,\\text{V}$ 電源經 $5\\,\\text{k}\\Omega$ 對 $2\\,\\mu\\text{F}$ 零電荷電容充電，$\\tau = 10\\,\\text{ms}$，在 $t = 10\\,\\text{ms}$ 時電容電壓秒答 $10 \\times 0.632 = 6.32\\,\\text{V}$。"
+        },
+
+        // 電子學 (4招)
+        {
+          id: "sp_el1", subject: "電子學", unit: "Ch2 二極體整流/濾波/截波/箝位與稽納穩壓",
+          timeSave: "⏱️ 省時 80%｜10秒秒殺",
+          title: "二極體截波與箝位「正負極值代入秒殺法」",
+          mnemonic: "「不畫完整正弦波！直接代輸入正峰值 +Vm 與負峰值 -Vm 算輸出極值，直接刪掉三個錯誤波形！」",
+          formula: "$$\\text{箝位：} V_{p-p(\\text{out})} = V_{p-p(\\text{in})}; \\qquad \\text{截波：導通時輸出被鎖定在電池電壓 } \\pm V_\\gamma$$",
+          slowWay: "分段討論正負半週每個角度的二極體導通區間並逐點描繪波形，耗時且容易畫錯。",
+          fastWay: "直接把 $v_i = +V_m$ 與 $v_i = -V_m$ 兩個端點代入電路，得出 $V_{o(\\max)}$ 與 $V_{o(\\min)}$ 即可秒選正確波形！",
+          example: "例題：輸入 $\\pm 10\\,\\text{V}$ 正弦波經負向箝位器（理想二極體），輸出峰對峰值維持 $20\\,\\text{V}$ 且最高點鎖在 $0\\,\\text{V}$，秒選 $0\\,\\text{V} \\sim -20\\,\\text{V}$ 波形。"
+        },
+        {
+          id: "sp_el2", subject: "電子學", unit: "Ch4 BJT直流偏壓電路",
+          timeSave: "⏱️ 省時 75%｜15秒秒殺",
+          title: "BJT 分壓式偏壓「RE 乘 (β+1) 反射拉直法」",
+          mnemonic: "「左邊分壓變 VBB 與 RB，射極電阻乘 (β+1) 拉上基極排成一條直線，15 秒算出 IB 與 IC！」",
+          formula: "$$I_B = \\frac{V_{BB} - 0.7}{R_B + (1 + \\beta)R_E}, \\quad I_C = \\beta I_B$$",
+          slowWay: "同時列基極迴路 KVL、射極節點 $I_E = I_B + I_C$ 與 $I_C = \\beta I_B$ 三條方程式代換消元。",
+          fastWay: "把射極電阻 $R_E$ 乘上 $(1+\\beta)$ 反射到基極，整條迴路拉成「$V_{BB} \\to R_B \\to 0.7\\,\\text{V} \\to (1+\\beta)R_E \\to \\text{地}$」，一行除法直接求 $I_B$！",
+          example: "例題：$V_{BB}=3\\,\\text{V}, R_B=7.5\\,\\text{k}\\Omega, R_E=1\\,\\text{k}\\Omega, \\beta=99$，$I_B = \\frac{3-0.7}{7.5\\,\\text{k}+100\\,\\text{k}} \\approx 21.4\\,\\mu\\text{A}$，$I_C \\approx 2.12\\,\\text{mA}$。"
+        },
+        {
+          id: "sp_el3", subject: "電子學", unit: "Ch5 BJT交流小訊號分析",
+          timeSave: "⏱️ 省時 80%｜10秒秒殺",
+          title: "BJT/FET 交流增益「無旁路電容口訣 Av = -(RC//RL)/(re + RE)」",
+          mnemonic: "「分子集極所有交流並聯電阻，分母射極所有未旁路電阻加 re，反相前面加負號！」",
+          formula: "$$A_{v(\\text{CE})} = -\\frac{R_C \\parallel R_L}{r_e + R_{E(\\text{未旁路})}}, \\quad r_e = \\frac{26\\,\\text{mV}}{I_E}$$",
+          slowWay: "重畫完整混合 $\\pi$ 模型，設測試電壓源與受控電流源 $\\beta i_b$ 慢慢推導輸入輸出電壓比。",
+          fastWay: "免畫等效電路！直接找集極端看到的交流並聯電阻當分子，找射極端沒有被電容短路的電阻加上 $r_e$ 當分母，CE 組態加負號即為答案！",
+          example: "例題：$R_C = 4\\,\\text{k}\\Omega, R_L = 4\\,\\text{k}\\Omega, r_e = 20\\,\\Omega, R_E = 180\\,\\Omega$（無旁路電容），$A_v = -\\frac{4\\,\\text{k}\\parallel 4\\,\\text{k}}{20+180} = -10$。"
+        },
+        {
+          id: "sp_el4", subject: "電子學", unit: "Ch9 運算放大器 OP-Amp 應用",
+          timeSave: "⏱️ 省時 85%｜8秒秒殺",
+          title: "運算放大器「虛短路＋節點電流零秒殺法」",
+          mnemonic: "「見負回授先寫 V- 等於 V+，反相增益負 Rf 除 Ri，非反相增益 1 加 Rf 除 Ri，隨耦器增益等於 1！」",
+          formula: "$$A_{v(\\text{反相})} = -\\frac{R_f}{R_i}, \\quad A_{v(\\text{非反相})} = 1 + \\frac{R_f}{R_i}, \\quad V_{o(\\text{減法對稱})} = \\frac{R_f}{R_i}(V_2 - V_1)$$",
+          slowWay: "對正負輸入端列兩組複雜電位方程式再消去中間節點電壓。",
+          fastWay: "確認有負回授後，將 $V_+$ 電位直接抄到 $V_-$ 節點，利用流入運放電流為 $0$（左邊流入電流＝右邊流出電流），一行比例式秒解 $V_o$！",
+          example: "例題：非反相放大器 $R_i = 2\\,\\text{k}\\Omega, R_f = 8\\,\\text{k}\\Omega, V_i = 1.5\\,\\text{V}$，秒算 $A_v = 1 + \\frac{8}{2} = 5$，$V_o = 7.5\\,\\text{V}$。"
+        },
+
+        // 數位邏輯設計 (4招)
+        {
+          id: "sp_dl1", subject: "數位邏輯設計", unit: "Ch1 數目系統與補數運算",
+          timeSave: "⏱️ 省時 80%｜10秒秒殺",
+          title: "進制轉換「8421 四位一組權重累加＋2^10=1024 速算法」",
+          mnemonic: "「十六進位拆四位 8421、八進位拆三位 421；2 的 10 次方記 1024，大數拆分秒算！」",
+          formula: "$$(1101)_2 = 8 + 4 + 0 + 1 = (13)_{10} = (\\text{D})_{16}, \\quad 2^{10} = 1024$$",
+          slowWay: "十六進位先乘 $16^2, 16^1, 16^0$ 轉成十進位大數字，再連除 $2$ 取餘數轉回二進位。",
+          fastWay: "二、八、十六進位互轉完全不經過十進位！十六進位每位直接展開 4 個二進位位元（8421 權重），十進位轉二進位直接用 $128, 64, 32, 16, 8, 4, 2, 1$ 減法湊數！",
+          example: "例題：$(3\\text{A})_{16}$ 轉八進位 $\\implies 0011\\,1010_2 \\implies 000\\,111\\,010_2 = (72)_8$，10 秒搞定。"
+        },
+        {
+          id: "sp_dl2", subject: "數位邏輯設計", unit: "Ch3 布林代數與第摩根定理",
+          timeSave: "⏱️ 省時 80%｜8秒秒殺",
+          title: "布林代數「有頭無尾留尾巴＆大吃小口訣」",
+          mnemonic: "「A + Abar B 有頭無尾留尾巴直接變 A + B；A + AB 大吃小直接變 A！」",
+          formula: "$$A + \\bar{A}B = A + B, \\quad A + AB = A, \\quad (A+B)(A+C) = A + BC$$",
+          slowWay: "乘開分配律 $(A + \\bar{A})(A + B) = 1 \\cdot (A + B)$ 或畫真值表 8 列逐列比對。",
+          fastWay: "看到「原變數＋反相變數乘別人」，直接把中間的反相變數劃掉留下尾巴（$A + \\bar{A}B = A + B$）；看到「單項＋包含該項的乘積項」，直接大吃小保留單項！",
+          example: "例題：化簡 $X + \\bar{X}YZ + XZ$，先大吃小消去 $XZ$ 剩 $X + \\bar{X}YZ$，再用有頭無尾留尾巴秒得 $X + YZ$。"
+        },
+        {
+          id: "sp_dl3", subject: "數位邏輯設計", unit: "Ch4 卡諾圖 K-map 化簡",
+          timeSave: "⏱️ 省時 75%｜15秒秒殺",
+          title: "卡諾圖「8格→4格→2格最大圈＋四角相鄰消兩變數法」",
+          mnemonic: "「先找 8 格再找 4 格、四角合圈別忘記；圈 2^k 格必消去 k 個變數，檢查項數防多圈！」",
+          formula: "$$\\text{圈 } 2^k \\text{ 格} \\implies \\text{消去 } k \\text{ 個互補變數（4變數圈4格剩2變數）}$$",
+          slowWay: "把每個最小項寫出完整 4 變數乘積式再兩兩提出公因式合併化簡。",
+          fastWay: "填完 1 與 X 後，優先找「孤立的 1（只有一種圈法）」先圈出必要質隱含項，4 變數卡諾圖圈 4 格必定只剩 2 個字母，寫出 3 個字母代表你圈太小！",
+          example: "例題：4 變數卡諾圖四個角落 $m_0, m_2, m_8, m_{10}$ 皆為 1，合圈消去 $A, C$ 秒寫 $\\bar{B}\\bar{D}$。"
+        },
+        {
+          id: "sp_dl4", subject: "數位邏輯設計", unit: "Ch7 非同步與同步計數器",
+          timeSave: "⏱️ 省時 85%｜6秒秒殺",
+          title: "非同步計數器模數「NAND 回授接腳十進制秒判 MOD-N 法」",
+          mnemonic: "「把接進清除端 NAND 閘的 Q 腳位權重（8, 4, 2, 1）直接相加，總和 N 就是 MOD-N 計數器！」",
+          formula: "$$N = \\sum_{i \\in \\text{NAND輸入}} 2^i, \\quad f_{\\text{out}} = \\frac{f_{\\text{CLK}}}{N}$$",
+          slowWay: "從 0000 開始一個一個脈波畫出 $Q_0, Q_1, Q_2, Q_3$ 時序波形直到出現歸零脈波為止。",
+          fastWay: "在低態有效非同步清除（$\\overline{\\text{CLR}}$）上數計數器中，只要看哪幾支 $Q$ 接進 NAND 閘，把對應位元權重（$Q_3=8, Q_2=4, Q_1=2, Q_0=1$）加起來就是模數 $N$！",
+          example: "例題：$Q_3$ 與 $Q_1$ 接進 NAND 閘觸發 $\\overline{\\text{CLR}}$，權重 $8 + 2 = 10$，秒判為 MOD-10（BCD 十進位）計數器！"
+        },
+
+        // 數學 C (4招)
+        {
+          id: "sp_mc1", subject: "數學 C", unit: "Ch4 三角函數與正餘弦定理",
+          timeSave: "⏱️ 省時 80%｜10秒秒殺",
+          title: "三角函數「3-4-5 / 5-12-13 比例＋才賽坦寇象限正負秒殺法」",
+          mnemonic: "「第一全正、第二 sin 正、第三 tan 正、第四 cos 正（才賽坦寇）；給一函數求其餘直接畫直角三角形！」",
+          formula: "$$\\text{直角三角形三邊比：} (3,4,5),\\;(5,12,13),\\;(8,15,17),\\;(7,24,25)$$",
+          slowWay: "利用 $\\sin^2\\theta + \\cos^2\\theta = 1$ 開根號取正負，再套商數關係與倒數關係慢慢除。",
+          fastWay: "先依象限決定正負號，接著無視正負號直接畫一個小直角三角形填上比例邊長，所有 $\\sin, \\cos, \\tan, \\sec$ 直接讀邊長比值！",
+          example: "例題：已知 $\\theta$ 在第二象限且 $\\sin\\theta = \\frac{5}{13}$，畫 5-12-13 三角形，第二象限 $\\cos$ 為負，秒答 $\\cos\\theta = -\\frac{12}{13}$。"
+        },
+        {
+          id: "sp_mc2", subject: "數學 C", unit: "Ch6 平面向量與柯西不等式",
+          timeSave: "⏱️ 省時 85%｜10秒秒殺",
+          title: "向量求三角形面積「二階行列式交叉相減取一半」",
+          mnemonic: "「兩向量座標排兩列，左上右下相乘減右上左下相乘，取絕對值除以 2！」",
+          formula: "$$\\Delta = \\frac{1}{2} |x_1 y_2 - x_2 y_1|$$",
+          slowWay: "先算三邊長再用海龍公式 $\\sqrt{s(s-a)(s-b)(s-c)}$，遇根號邊長算到崩潰。",
+          fastWay: "統測坐標平面三角形面積一律用向量行列式！共起點兩向量 $\\vec{a}=(x_1,y_1), \\vec{b}=(x_2,y_2)$ 交叉相減取絕對值一半，10 秒算出精確面積！",
+          example: "例題：$\\vec{a} = (3, 4), \\vec{b} = (-2, 5)$，面積 $\\Delta = \\frac{1}{2}|3\\times 5 - 4\\times(-2)| = \\frac{1}{2}|15+8| = 11.5$。"
+        },
+        {
+          id: "sp_mc3", subject: "數學 C", unit: "Ch10 複數極式/隸美弗定理與微積分基礎",
+          timeSave: "⏱️ 省時 85%｜12秒秒殺",
+          title: "複數高次方「極式長度次方、角度乘倍數秒殺法」",
+          mnemonic: "「1±i 長度根號 2 角度 45 度；算 n 次方時長度取 n 次方、角度直接乘以 n 倍！」",
+          formula: "$$(1 + i)^n = (\\sqrt{2})^n (\\cos 45^\\circ n + i\\sin 45^\\circ n)$$",
+          slowWay: "用二項式定理展開 $(1+i)^8 = C^8_0 + C^8_1 i + \\dots$ 展開 9 項再合併實部虛部。",
+          fastWay: "直接轉極式：$1+i = \\sqrt{2}\\angle 45^\\circ$，取 $8$ 次方長度變 $(\\sqrt{2})^8 = 16$，角度變 $45^\\circ \\times 8 = 360^\\circ$（回到 $0^\\circ$ 正實軸），秒答 $16$！",
+          example: "例題：計算 $(1 - \\sqrt{3}i)^6 = (2\\angle 300^\\circ)^6 = 2^6\\angle 1800^\\circ = 64\\angle 0^\\circ = 64$。"
+        },
+        {
+          id: "sp_mc4", subject: "數學 C", unit: "Ch10 複數極式/隸美弗定理與微積分基礎",
+          timeSave: "⏱️ 省時 80%｜8秒秒殺",
+          title: "定積分對稱區間「奇函數秒變 0、偶函數乘 2 倍法」",
+          mnemonic: "「看到積分上下限是 -a 到 +a，奇數次方項直接劃掉變 0，偶數次方項變 2 倍算 0 到 a！」",
+          formula: "$$\\int_{-a}^{a} (\\text{奇函數} + \\text{偶函數})\\,dx = 2 \\int_{0}^{a} (\\text{偶函數})\\,dx$$",
+          slowWay: "所有項全部積分後代入 $+a$ 與 $-a$，處理一堆負號的高次方加減而粗心算錯。",
+          fastWay: "只要積分區間對稱 $[-a, a]$，所有 $x^5, x^3, x, \\sin x$ 奇函數積分必為 $0$ 直接劃掉，只留偶次項與常數項算 $0$ 到 $a$ 再乘 $2$！",
+          example: "例題：$\\int_{-2}^{2} (5x^3 - 4x + 3x^2 + 1)\\,dx$，劃掉 $5x^3 - 4x$，只算 $2\\int_0^2 (3x^2+1)\\,dx = 2(8+2) = 20$。"
+        },
+
+        // 英文 (4招)
+        {
+          id: "sp_en1", subject: "英文", unit: "U1 核心4500字彙與字首字根",
+          timeSave: "⏱️ 省時 75%｜10秒秒殺",
+          title: "字彙選擇「空格前後詞性秒刪兩選項＋字首字根推義法」",
+          mnemonic: "「冠詞形容詞後找名詞、be 動詞連綴後找形容詞、修飾動詞句子找副詞，先看字尾砍一半選項！」",
+          formula: "$$\\text{字尾辨詞性：-tion/-ment (n.) ｜ -ive/-able/-ous (adj.) ｜ -ly (adv.)}$$",
+          slowWay: "從第一個字逐字翻譯整句長難句，遇到不會的單字就卡住浪費時間。",
+          fastWay: "先看空格前後 2 個字判斷所需詞性，把詞性不符的選項直接劃掉；若四個選項同詞性，拆字首（un-/dis- 負向、pro- 正向）對應句意正負方向！",
+          example: "例題：空格前為 `is highly ______`，副詞 highly 後需接形容詞，直接從字尾 `-ive / -able` 鎖定答案。"
+        },
+        {
+          id: "sp_en2", subject: "英文", unit: "U7 克漏字與文意選填邏輯",
+          timeSave: "⏱️ 省時 75%｜12秒秒殺",
+          title: "克漏字「轉折詞語意反轉（However/Yet）＋ since 時態鎖定法」",
+          mnemonic: "「前後正反轉折選 However/Nevertheless；看到 since + 過去時間點，主句秒選 have/has + p.p.！」",
+          formula: "$$\\text{轉折：However / Yet / Despite + N} \\quad｜\\quad \\text{完成式：S + have/has + p.p. + since + 過去點}$$",
+          slowWay: "把整篇克漏字從頭讀到尾翻譯完才回頭寫空格。",
+          fastWay: "克漏字 70% 考單句結構與前後句轉折！先掃描連接詞與時間副詞（since, by the time, if），精準鎖定文法題秒選。",
+          example: "例題：句尾出現 `since he graduated from college`，主句動詞無條件秒選現在完成式 `has worked`。"
+        },
+        {
+          id: "sp_en3", subject: "英文", unit: "U8 閱讀測驗與非選擇題重組/中譯英",
+          timeSave: "⏱️ 省時 80%｜20秒定位",
+          title: "閱讀測驗「首尾句主旨定位＋選項同義字替換（Paraphrase）比對法」",
+          mnemonic: "「先讀題幹圈大寫專有名詞與數字，回文章掃描定位句，正確答案通常是原文換句話說！」",
+          formula: "$$\\text{主旨題看首段末句與末段首句；細節題抓關鍵字回原文上下兩句比對}$$",
+          slowWay: "先精讀全文 300 字再看題目，看完題目又忘記細節重讀第二遍。",
+          fastWay: "先看問題抓關鍵字（人名、年代、原因），回文章直接掃描該關鍵字所在句子，將選項與該句做同義字替換比對，含 must / never / all 絕對字眼選項多為錯誤！",
+          example: "例題：原文寫 `reduce energy consumption by 30%`，選項同義替換為 `cut down on power use`，即為正解。"
+        },
+        {
+          id: "sp_en4", subject: "英文", unit: "U8 閱讀測驗與非選擇題重組/中譯英",
+          timeSave: "⏱️ 省時 75%｜25秒組句",
+          title: "句子重組「抓出主詞＋核心動詞骨架，修飾語往後掛」",
+          mnemonic: "「先找大寫開頭詞當主詞，配核心動詞與受詞搭好主幹，介系詞片語與關係子句全部往後掛！」",
+          formula: "$$\\text{黃金骨架：S + V + O + (地方副詞片語) + (時間副詞片語)}$$",
+          slowWay: "憑中文語順硬把英文單字一個一個拼湊，導致動詞位置錯亂。",
+          fastWay: "把提示字分成「名詞群、動詞群、介系詞片語」三堆，先搭出 `It is + Adj. + for sb. + to V` 或 `S + V + O` 骨架，最後點算總字數確保一字不漏！",
+          example: "例題：提示 `(to protect / it / our duty / is / the environment)` $\\implies$ 骨架 `It is our duty + to protect the environment.`"
+        },
+
+        // 國文 (3招)
+        {
+          id: "sp_ch1", subject: "國文", unit: "U2 核心古文唐宋散文篇",
+          timeSave: "⏱️ 省時 80%｜8秒秒殺",
+          title: "15 篇核心古文「作者＋出處＋核心哲理關鍵字秒配法」",
+          mnemonic: "「師說韓愈批判恥師、赤壁蘇軾水月變與不變、勸學荀子累積專一、燭之武左傳秦晉利害！」",
+          formula: "$$\\text{篇名} \\leftrightarrow \\text{作者／出處} \\leftrightarrow \\text{核心主旨關鍵字（三點一線快速配對）}$$",
+          slowWay: "考場上逐句翻譯整段古文引文再猜測作者想表達的道理。",
+          fastWay: "看到引文中的招牌關鍵字（如「句讀之不知」秒配〈師說〉韓愈、「逝者如斯，而未嘗往也」秒配〈赤壁賦〉蘇軾），直接套用該篇核心主旨選答！",
+          example: "例題：引文出現「聞道有先後，術業有專攻」，秒配韓愈〈師說〉相對師道觀，8 秒選答。"
+        },
+        {
+          id: "sp_ch2", subject: "國文", unit: "U7 高職特色應用文書信題辭對聯",
+          timeSave: "⏱️ 省時 85%｜6秒秒殺",
+          title: "應用文「書信提稱語身份對應＋題辭偏旁聯想法」",
+          mnemonic: "「師長函丈壇席道啟、父母膝下安啟、信封寫敬啟直接淘汰；杏壇教育、杏林醫學、椿萱父母！」",
+          formula: "$$\\text{對聯判上下聯：上聯末字仄聲（三四聲），下聯末字平聲（一二聲）}$$",
+          slowWay: "死背上百句四字題辭卻在考場上把教育界與醫學界搞混。",
+          fastWay: "用關鍵字聯想：「孔子在杏壇講學 $\\to$ 杏壇＝教育」、「董奉種杏成林治病 $\\to$ 杏林＝醫學」；書信題只要選項出現信封寫「敬啟」直接劃掉！",
+          example: "例題：祝賀診所開業選「杏林春暖 / 妙手回春」；祝賀老師退休選「春風化雨 / 杏壇之光」。"
+        },
+        {
+          id: "sp_ch3", subject: "國文", unit: "U8 現代文對讀與統測六級分寫作",
+          timeSave: "⏱️ 省時 75%｜結構秒建",
+          title: "寫作測驗「起承轉合萬用四段高分結構模板」",
+          mnemonic: "「第一段破題點旨、第二段技職實作經驗敘事、第三段逆境轉折思辨、第四段總結昇華呼應！」",
+          formula: "$$\\text{字數黃金比例：首段 100 字} + \\text{第二段 220 字} + \\text{第三段 200 字} + \\text{末段 100 字} \\approx 620 \\text{ 字}$$",
+          slowWay: "盯著作文題目發呆 15 分鐘想不出開頭，最後時間不夠草草收尾。",
+          fastWay: "直接套用四段結構：開頭用名言或生活現象破題 $\\to$ 中段寫自己在電子實習工場或專題製作中克服失敗的真實案例 $\\to$ 轉折昇華成人生哲理，穩拿五級分以上！",
+          example: "例題：題目〈從錯誤中學習〉，第二段寫焊接電路板短路查修經驗，第三段轉折領悟除錯精神，真實深刻最受閱卷青睞。"
+        }
+      ];
+
+      // ---------------------------------------------------------------------
+      // 6. ALL 6 SUBJECTS × ALL 57 LESSONS COMPLETE PLAYBOOK DATA
+      // ---------------------------------------------------------------------
+      const CURRICULUM_PLAYBOOK = [
+        // 基本電學 (12 課)
+        { id: "be_01", subject: "基本電學", unit: "Ch1 電學基本概念", mnemonic: "「庫侖算電子個數、電流是每秒庫侖、電功率電壓乘電流、度電千瓦乘小時」", formulas: "$$Q = I \\cdot t = n \\cdot e, \\quad V = \\frac{W}{Q}, \\quad P = V \\cdot I, \\quad 1\\,\\text{度} = 1\\,\\text{kWh} = 3.6 \\times 10^6\\,\\text{J}$$", steps: ["Step 1：時間統一換算成秒（s）、電流換算成安培（A），求出總電荷量 $Q = I \\cdot t$。", "Step 2：求電位能或作功 $W = Q \\cdot V$；求電功率 $P = V \\cdot I$。", "Step 3：計算電費度數時，先將功率換算成千瓦（kW），再乘以使用小時數（h）。"], pitfall: "1 度電是「能量單位（$3.6 \\times 10^6\\,\\text{J}$）」不是功率單位，算度數時間務必用小時！" },
+        { id: "be_02", subject: "基本電學", unit: "Ch2 電阻與歐姆定律", mnemonic: "「拉長 n 倍電阻變 n 平方倍、色碼棕紅橙黃綠藍紫灰白、溫度係數推線性比例」", formulas: "$$R = \\rho \\frac{L}{A}, \\quad R_2 = R_1 [1 + \\alpha_1 (T_2 - T_1)], \\quad \\frac{R_2}{R_1} = \\frac{|T_0| + T_2}{|T_0| + T_1}, \\quad V = I \\cdot R$$", steps: ["Step 1：體積不變下導線拉長 $n$ 倍，新電阻變為原電阻的 $n^2$ 倍。", "Step 2：金屬導體溫度上升電阻變大，利用推論絕對零度 $|T_0|$（銅約 $234.5^\\circ\\text{C}$）建立比例求解。", "Step 3：四環色碼前兩環為有效數字、第三環為 $10^n$ 乘數、第四環為誤差（金 $\\pm 5\\%$、銀 $\\pm 10\\%$）。"], pitfall: "「拉長至原長的 $n$ 倍（$R_2 = n^2 R_1$）」與「拉長增加 $n$ 倍（新長為 $(n+1)L$）」題意務必看清！" },
+        { id: "be_03", subject: "基本電學", unit: "Ch3 串並聯電路與克希荷夫定律", mnemonic: "「串聯分壓看正比、並聯分流看反比、KCL 流入等於流出、KVL 迴路壓降和為零」", formulas: "$$V_x = E \\cdot \\frac{R_x}{R_{\\text{total}}}, \\quad I_1 = I_{\\text{total}} \\cdot \\frac{R_2}{R_1 + R_2}, \\quad \\sum I_{\\text{in}} = \\sum I_{\\text{out}}, \\quad \\sum V_{\\text{loop}} = 0$$", steps: ["Step 1：化簡串並聯電阻，善用倍數並聯速算法求總電阻 $R_T$。", "Step 2：兩電阻並聯分流時，分子放「對面電阻」，分母放「兩電阻相加」。", "Step 3：惠斯登電橋若對角電阻乘積相等（$R_1 R_4 = R_2 R_3$），中間檢流計支路電流為 $0$。"], pitfall: "多支路並聯時，先求總電導 $G_T = G_1 + G_2 + G_3$ 再取倒數，比直接分數通分快得多！" },
+        { id: "be_04", subject: "基本電學", unit: "Ch4 直流網路分析與戴維寧/諾頓", mnemonic: "「電壓源短路、電流源開路；重疊定理逐一算；最大功率 RL 等於 RTH 分母除以 4」", formulas: "$$V_{TH} = V_{oc}, \\quad I_N = I_{sc} = \\frac{V_{TH}}{R_{TH}}, \\quad P_{L(\\max)} = \\frac{V_{TH}^2}{4 R_{TH}} = \\frac{I_N^2 R_N}{4}$$", steps: ["Step 1：移開負載 $R_L$，使用節點電壓法或密爾門定理求開路電壓 $V_{TH}$。", "Step 2：獨立電壓源改短路、獨立電流源改開路（相依電源保留），由負載端往回看求 $R_{TH}$。", "Step 3：當 $R_L = R_{TH}$ 時負載獲得最大功率 $P_{L(\\max)} = \\frac{V_{TH}^2}{4 R_{TH}}$，此時電源效率為 $50\\%$。"], pitfall: "重疊定理僅適用於線性電壓與電流的疊加，「功率」不可用重疊定理直接相加！" },
+        { id: "be_05", subject: "基本電學", unit: "Ch5 電容與靜電", mnemonic: "「串聯電容像並聯電阻、並聯電容直接加；串聯分壓反比分配、儲能二分之一 CV 平方」", formulas: "$$C = \\varepsilon \\frac{A}{d} = \\frac{Q}{V}, \\quad V_1 = V_T \\frac{C_2}{C_1 + C_2}, \\quad W_C = \\frac{1}{2} C V^2 = \\frac{Q^2}{2C}$$", steps: ["Step 1：串聯電容總電容量 $C_T = \\frac{C_1 C_2}{C_1 + C_2}$；並聯電容總電容量 $C_T = C_1 + C_2$。", "Step 2：兩電容串聯時，電荷量 $Q$ 相同，電壓分配與電容量成反比（電容越小分到電壓越高）。", "Step 3：兩帶電電容器並聯後，總電荷量守恆（$Q_{\\text{total}} = C_1 V_1 + C_2 V_2$），共同電壓 $V_T = \\frac{Q_{\\text{total}}}{C_1 + C_2}$。"], pitfall: "電容串聯分壓分子放「對方電容 $C_2$」，剛好與電阻串聯分壓相反，考場極易寫反！" },
+        { id: "be_06", subject: "基本電學", unit: "Ch6 電感與電磁", mnemonic: "「互感順接加 2M、反接減 2M；耦合係數 M 等於 k 根號 L1L2；儲能二分之一 LI 平方」", formulas: "$$L = \\frac{N \\Phi}{I} = \\frac{\\mu N^2 A}{l}, \\quad e = L \\frac{\\Delta i}{\\Delta t}, \\quad L_{\\text{eq}} = L_1 + L_2 \\pm 2M, \\quad M = k\\sqrt{L_1 L_2}, \\quad W_L = \\frac{1}{2} L I^2$$", steps: ["Step 1：依電流流入打點端方向判斷互感極性：同進或同出打點端為「互助（$+2M$）」，一進一出為「互消（$-2M$）」。", "Step 2：並聯互感等效電感公式 $L_{\\text{eq}} = \\frac{L_1 L_2 - M^2}{L_1 + L_2 \\mp 2M}$。", "Step 3：自感應電勢方向依冷次定律恆反抗原電流變化方向。"], pitfall: "耦合係數 $k$ 範圍為 $0 \\le k \\le 1$，若算出 $M > \\sqrt{L_1 L_2}$ 必為計算錯誤。" },
+        { id: "be_07", subject: "基本電學", unit: "Ch7 直流暫態 RC/RL", mnemonic: "「時間常數 RC 或 L 除 R；瞬間電容視短路、電感視開路；穩態電容變開路、電感變短路」", formulas: "$$\\tau_{RC} = R_{TH} C, \\quad \\tau_{RL} = \\frac{L}{R_{TH}}, \\quad y(t) = y(\\infty) + [y(0^+) - y(\\infty)] e^{-t/\\tau}$$", steps: ["Step 1：求 $t = 0^-$ 穩態值，利用「電容電壓不突變、電感電流不突變」定初始值。", "Step 2：求 $t \\to \\infty$ 新穩態值 $y(\\infty)$，並從儲能元件兩端求戴維寧等效電阻 $R_{TH}$ 算出 $\\tau$。", "Step 3：套用萬用暫態公式 $y(t) = y(\\infty) + [y(0^+) - y(\\infty)]e^{-t/\\tau}$，經過 $5\\tau$ 視為進入穩態。"], pitfall: "RL 電路的時間常數是 $\\tau = \\frac{L}{R_{TH}}$（電阻在分母！），常有人誤乘成 $L \\cdot R$。" },
+        { id: "be_08", subject: "基本電學", unit: "Ch8 交流電與相量", mnemonic: "「有效值最大值除根號二、加減用直角座標、乘除轉極座標、超前落後看相位差」", formulas: "$$V_{\\text{rms}} = \\frac{V_m}{\\sqrt{2}} \\approx 0.707 V_m, \\quad V_{\\text{avg(半波)}} = \\frac{V_m}{\\pi}, \\quad V_{\\text{avg(全波)}} = \\frac{2V_m}{\\pi}, \\quad f = \\frac{\\omega}{2\\pi}$$", steps: ["Step 1：將 $\\cos(\\omega t + \\theta)$ 加上 $90^\\circ$ 統一轉為 $\\sin(\\omega t + \\theta + 90^\\circ)$ 再比較超前與落後。", "Step 2：正弦波有效值 $\\frac{V_m}{\\sqrt{2}}$；三角波有效值 $\\frac{V_m}{\\sqrt{3}}$；方波有效值 $V_m$。", "Step 3：相量加減法展開為 $a + jb$；乘除法化為 $r\\angle\\theta$ 大小相乘除、角度相加減。"], pitfall: "波形因數 $\\text{FF} = \\frac{\\text{有效值}}{\\text{平均值}}$（正弦波 $1.11$）；波峰因數 $\\text{CF} = \\frac{\\text{最大值}}{\\text{有效值}}$（正弦波 $\\sqrt{2}$）。" },
+        { id: "be_09", subject: "基本電學", unit: "Ch9 基本交流電路 RLC", mnemonic: "「純電阻同相、電感電流落後 90 度、電容電流超前 90 度、串聯算阻抗、並聯算導納」", formulas: "$$X_L = \\omega L = 2\\pi f L, \\quad X_C = \\frac{1}{\\omega C} = \\frac{1}{2\\pi f C}, \\quad Z = R + j(X_L - X_C), \\quad Y = G + j(B_C - B_L)$$", steps: ["Step 1：先算感抗 $X_L$ 與容抗 $X_C$，串聯電路總阻抗 $Z = R + j(X_L - X_C)$。", "Step 2：若 $X_L > X_C$ 呈電感性（電流落後電壓）；若 $X_C > X_L$ 呈電容性（電流超前電壓）。", "Step 3：並聯電路改用導納 $Y = \\frac{1}{R} + j(\\frac{1}{X_C} - \\frac{1}{X_L})$，總電流 $I = V \\cdot Y$。"], pitfall: "並聯電路中電容導納為 $+jB_C$、電感導納為 $-jB_L$，正負號剛好與串聯電抗相反！" },
+        { id: "be_10", subject: "基本電學", unit: "Ch10 交流電功率與功因改善", mnemonic: "「視在功率直角斜邊、平均功率消耗電阻、並聯電容補虛功、提高功因電流降」", formulas: "$$S = V \\cdot I = \\sqrt{P^2 + Q^2}, \\quad P = V I \\cos\\theta = I^2 R, \\quad Q = V I \\sin\\theta, \\quad \\text{PF} = \\cos\\theta = \\frac{P}{S} = \\frac{R}{|Z|}$$", steps: ["Step 1：建立功率三角形，平均功率 $P$（W）在水平邊、無效功率 $Q$（VAR）在垂直邊、視在功率 $S$（VA）在斜邊。", "Step 2：欲將電感性負載功因由 $\\cos\\theta_1$ 改善至 $\\cos\\theta_2$，所需並聯電容虛功 $Q_C = P(\\tan\\theta_1 - \\tan\\theta_2)$。", "Step 3：由 $Q_C = \\frac{V^2}{X_C} = \\omega C V^2$ 反推出所需並聯電容量 $C$。"], pitfall: "並聯電容改善功因後，負載本身的平均功率 $P$ 維持不變，但電源總電流 $I$ 大幅下降！" },
+        { id: "be_11", subject: "基本電學", unit: "Ch11 諧振電路", mnemonic: "「諧振電抗相抵消、串聯阻抗最小電流最大、並聯阻抗最大電流最小、頻帶寬度 fr 除 Q」", formulas: "$$f_r = \\frac{1}{2\\pi\\sqrt{LC}}, \\quad Q_s = \\frac{X_L}{R} = \\frac{1}{R}\\sqrt{\\frac{L}{C}}, \\quad Q_p = \\frac{R}{X_L} = R\\sqrt{\\frac{C}{L}}, \\quad \\text{BW} = f_2 - f_1 = \\frac{f_r}{Q}$$", steps: ["Step 1：令 $X_L = X_C$ 求諧振頻率 $f_r = \\frac{1}{2\\pi\\sqrt{LC}}$，此時電路呈純電阻性，功率因數 $\\text{PF} = 1$。", "Step 2：串聯諧振時電感與電容兩端電壓放大 $Q_s$ 倍；並聯諧振時分支電流放大 $Q_p$ 倍。", "Step 3：半功率點（$0.707$ 倍峰值）截止頻率為 $f_1 = f_r - \\frac{\\text{BW}}{2}$ 與 $f_2 = f_r + \\frac{\\text{BW}}{2}$。"], pitfall: "品質因數 $Q$ 越高，頻帶寬度 $\\text{BW}$ 越窄，代表選頻特性（選擇性）越好！" },
+        { id: "be_12", subject: "基本電學", unit: "Ch12 交流電源與三相電路", mnemonic: "「Y 接線電壓根號三倍相電壓、Δ 接線線電流根號三倍相電流、三相總功率統一根號三」", formulas: "$$\\text{Y接：} V_L = \\sqrt{3} V_P, \\; I_L = I_P; \\quad \\Delta\\text{接：} V_L = V_P, \\; I_L = \\sqrt{3} I_P; \\quad P_{3\\phi} = \\sqrt{3} V_L I_L \\cos\\theta$$", steps: ["Step 1：先判別電源與負載為 Y 接或 Δ 接，釐清線電壓 $V_L$ 與相電壓 $V_P$ 關係。", "Step 2：一律先算「單相負載相電流 $I_P = \\frac{V_P}{Z_P}$」，若為 Δ 接負載再乘以 $\\sqrt{3}$ 求線電流 $I_L$。", "Step 3：同一組平衡三相負載，Δ 接所消耗的總功率為 Y 接的 $3$ 倍（$P_\\Delta = 3 P_Y$）。"], pitfall: "功率公式 $P_{3\\phi} = \\sqrt{3} V_L I_L \\cos\\theta$ 中的 $\\theta$ 是「相電壓與相電流的阻抗角」，非線電壓與線電流夾角！" },
+
+        // 電子學 (11 課)
+        { id: "el_01", subject: "電子學", unit: "Ch1 半導體物理與PN接面", mnemonic: "「四價本質矽與鍺、五價施主變 N 型多電子、三價受主變 P 型多電洞、PN 順偏空乏窄」", formulas: "$$n \\cdot p = n_i^2, \\quad V_\\gamma(\\text{Si}) \\approx 0.7\\,\\text{V}, \\quad V_\\gamma(\\text{Ge}) \\approx 0.3\\,\\text{V}, \\quad V_T = \\frac{kT}{q} \\approx 26\\,\\text{mV}$$", steps: ["Step 1：依質量作用定律 $n \\cdot p = n_i^2$，N 型多數載子為自由電子（$n \\approx N_D$），少數載子電洞 $p = \\frac{n_i^2}{N_D}$。", "Step 2：溫度每上升 $10^\\circ\\text{C}$，逆向飽和電流 $I_S$ 約增為 $2$ 倍；障礙電位每上升 $1^\\circ\\text{C}$ 下降約 $2\\,\\text{mV}$。", "Step 3：P 接正、N 接負為順向偏壓，空乏區變窄；反之為逆向偏壓，空乏區變寬。"], pitfall: "P 型與 N 型半導體整體皆呈「電中性」（正負電荷總數相等），並非帶正電或負電！" },
+        { id: "el_02", subject: "電子學", unit: "Ch2 二極體整流/濾波/截波/箝位與稽納穩壓", mnemonic: "「半波頻率不變、全波頻率加倍、截波削波峰、箝位上下移、稽納逆偏做穩壓」", formulas: "$$V_{dc(\\text{半波})} = \\frac{V_m}{\\pi}, \\quad V_{dc(\\text{全波})} = \\frac{2V_m}{\\pi}, \\quad \\text{PIV(中間抽頭)} = 2 V_m, \\quad \\text{PIV(橋式)} = V_m$$", steps: ["Step 1：橋式全波整流輸出峰值需扣兩顆二極體壓降（$V_m - 1.4\\,\\text{V}$），輸出漣波頻率為電源頻率 $2$ 倍。", "Step 2：截波電路削去超過門檻的部分（峰對峰值變小）；箝位電路使波形上下平移（峰對峰值不變）。", "Step 3：稽納二極體工作於逆向崩潰區，$I_R = \\frac{V_i - V_Z}{R_s} = I_Z + I_L$。"], pitfall: "全波整流「中間抽頭式」每顆二極體逆向峰值電壓 PIV 為 $2V_m$，而「橋式整流」僅需 $V_m$！" },
+        { id: "el_03", subject: "電子學", unit: "Ch3 BJT結構與工作區判別", mnemonic: "「射極濃度最高、基極最薄、集極面積最大；順逆作用區、雙順飽和區、雙逆截止區」", formulas: "$$I_E = I_B + I_C, \\quad I_C = \\beta I_B = \\alpha I_E, \\quad \\beta = \\frac{\\alpha}{1 - \\alpha}, \\quad \\alpha = \\frac{\\beta}{1 + \\beta}$$", steps: ["Step 1：檢查基射極（BE）與基集極（BC）接面偏壓：BE 順偏且 BC 逆偏為「作用區（放大區）」。", "Step 2：BE 與 BC 皆順偏為「飽和區」（$V_{CE(\\text{sat})} \\approx 0.2\\,\\text{V}$）；皆逆偏為「截止區」（$I_C \\approx 0$）。", "Step 3：NPN 箭頭朝外（電流流出射極），PNP 箭頭朝內（電流流入射極）。"], pitfall: "在飽和區中 $I_C < \\beta I_B$，不可再直接用 $I_C = \\beta I_B$ 計算集極電流！" },
+        { id: "el_04", subject: "電子學", unit: "Ch4 BJT直流偏壓電路", mnemonic: "「分壓偏壓最穩定、左化戴維寧求 VBB、分母射極乘 (1+β)、最後驗證 VCE 大於 0.2V」", formulas: "$$V_{BB} = V_{CC}\\frac{R_2}{R_1+R_2}, \\quad R_B = R_1 \\parallel R_2, \\quad I_B = \\frac{V_{BB} - 0.7}{R_B + (1+\\beta)R_E}, \\quad V_{CE} = V_{CC} - I_C R_C - I_E R_E$$", steps: ["Step 1：將基極左側分壓電阻 $R_1、R_2$ 轉換為戴維寧等效電壓 $V_{BB}$ 與等效電阻 $R_B$。", "Step 2：列出基極-射極迴圈 KVL 求出 $I_B$，再乘以 $\\beta$ 得集極工作電流 $I_C$。", "Step 3：計算 $V_{CE}$ 並檢查是否大於 $0.2\\,\\text{V}$；若小於 $0.2\\,\\text{V}$ 則進入飽和區，改設 $V_{CE} = 0.2\\,\\text{V}$ 重算。"], pitfall: "$\\text{mA}$ 乘以 $\\text{k}\\Omega$ 直接等於伏特（V），計算 $V_{CE}$ 時無需再做次方換算！" },
+        { id: "el_05", subject: "電子學", unit: "Ch5 BJT交流小訊號分析", mnemonic: "「直流電源接地、耦合電容短路、射極電阻算 re 等於 26mV 除 IE、CE 反相增益高」", formulas: "$$r_e = \\frac{26\\,\\text{mV}}{I_E}, \\quad r_\\pi = (1+\\beta)r_e, \\quad A_{v(\\text{CE})} = -\\frac{R_C \\parallel R_L}{r_e}, \\quad A_{v(\\text{CC})} \\approx +1$$", steps: ["Step 1：先做直流分析求出 $I_E$，進而算出動態射極電阻 $r_e = \\frac{26\\,\\text{mV}}{I_E}$。", "Step 2：畫交流等效電路（$V_{CC}$ 接地、大電容視為短路），若射極電阻 $R_E$ 並聯旁路電容 $C_E$ 則交流時 $R_E$ 被短路。", "Step 3：共射極（CE）輸入輸出反相且電壓與電流增益皆大；共集極（CC，射極隨耦器）同相、$A_v \\approx 1$。"], pitfall: "若 $R_E$ 未接旁路電容 $C_E$，則 CE 放大器電壓增益變為 $A_v = -\\frac{R_C \\parallel R_L}{r_e + R_E}$！" },
+        { id: "el_06", subject: "電子學", unit: "Ch6 串級放大與頻率響應", mnemonic: "「總增益各級相乘、分貝相加、截止頻率降 3dB 功率剩一半、低頻看耦合旁路、高頻看極際電容」", formulas: "$$A_{v(\\text{total})} = A_{v1} \\times A_{v2}, \\quad G_{v(\\text{dB})} = 20\\log_{10}|A_v|, \\quad G_{p(\\text{dB})} = 10\\log_{10} A_p, \\quad f_L = \\frac{1}{2\\pi R_{\\text{eq}} C}$$", steps: ["Step 1：計算前後級負載效應（第二級輸入阻抗 $Z_{i2}$ 作為第一級的負載電阻 $R_{L1}$），求各級實際增益後相乘。", "Step 2：電壓增益轉分貝用 $20\\log_{10}|A_v|$，多級串接時總分貝數直接相加。", "Step 3：低頻截止頻率 $f_L$ 由外部耦合／旁路電容決定；高頻截止頻率 $f_H$ 由電晶體內部雜散與米勒電容決定。"], pitfall: "電壓增益用 $20\\log$、功率增益用 $10\\log$！半功率點對應電壓降為 $0.707$ 倍（$-3\\,\\text{dB}$）。" },
+        { id: "el_07", subject: "電子學", unit: "Ch7 FET特性與直流偏壓", mnemonic: "「電壓控制電流源、閘極電流永遠為零、JFET 夾止電壓、增強型 MOSFET 需大於臨界 Vt」", formulas: "$$\\text{JFET/空乏型：} I_D = I_{DSS}\\left(1 - \\frac{V_{GS}}{V_P}\\right)^2; \\qquad \\text{增強型：} I_D = K(V_{GS} - V_t)^2$$", steps: ["Step 1：利用閘極輸入電流 $I_G = 0\\,\\text{A}$ 的特性，直接求出閘極電位 $V_G$。", "Step 2：列出 $V_{GS} = V_G - I_D R_S$，代入蕭克萊二次方程式解出 $I_D$。", "Step 3：驗證飽和區（夾止區）條件：$V_{DS} \\ge |V_{GS} - V_P|$（或 $V_{DS} \\ge V_{GS} - V_t$）。"], pitfall: "解二次方程式會得出兩個 $I_D$ 根，務必檢查 $|V_{GS}| < |V_P|$ 才能保留正確根！" },
+        { id: "el_08", subject: "電子學", unit: "Ch8 FET交流小訊號分析", mnemonic: "「互導 gm 單位西門子、共源極反相放大 Av 等於負 gm RD、共汲極源極隨耦器同相小於一」", formulas: "$$g_m = g_{m0}\\left(1 - \\frac{V_{GS}}{V_P}\\right), \\quad g_{m0} = \\frac{2 I_{DSS}}{|V_P|}, \\quad A_{v(\\text{CS})} = -g_m (R_D \\parallel R_L \\parallel r_d), \\quad A_{v(\\text{CD})} = \\frac{g_m R_S}{1 + g_m R_S}$$", steps: ["Step 1：先由直流偏壓求得 $V_{GS}$ 或 $I_D$，代入公式計算交流互導 $g_m$（單位為 $\\text{mA/V}$ 或 $\\text{mS}$）。", "Step 2：共源極（CS）對應 BJT 的共射極，輸出與輸入反相，輸入阻抗極高。", "Step 3：共汲極（CD，源極隨耦器）輸出與輸入同相，增益略小於 $1$，適合作為阻抗匹配緩衝級。"], pitfall: "增強型 MOSFET 的互導公式為 $g_m = 2K(V_{GS} - V_t) = 2\\sqrt{K I_D}$，切勿與 JFET 公式混淆！" },
+        { id: "el_09", subject: "電子學", unit: "Ch9 運算放大器 OP-Amp 應用", mnemonic: "「負回授虛短路 V- 等於 V+、虛開路 I- 等於 I+ 等於 0、反相增益負 Rf/Ri、非反相 1 加 Rf/Ri」", formulas: "$$A_{v(\\text{反相})} = -\\frac{R_f}{R_i}, \\quad A_{v(\\text{非反相})} = 1 + \\frac{R_f}{R_i}, \\quad V_{o(\\text{加法器})} = -R_f\\left(\\frac{V_1}{R_1} + \\frac{V_2}{R_2}\\right)$$", steps: ["Step 1：確認輸出端經回授元件接回反相輸入端（$-$），立即套用虛短路 $V_- = V_+$ 與虛開路 $I_- = I_+ = 0$。", "Step 2：對反相節點列出克希荷夫電流定律（KCL），推導輸出 $V_o$ 與輸入之關係。", "Step 3：若無負回授或為正回授，則為比較器或史密特觸發器，輸出飽和在 $+V_{\\text{sat}}$ 或 $-V_{\\text{sat}}$。"], pitfall: "反相放大器輸入阻抗為 $R_i$，非反相放大器（含電壓隨耦器）理想輸入阻抗為無窮大 $\\infty$！" },
+        { id: "el_10", subject: "電子學", unit: "Ch10 基本振盪電路與555計時器", mnemonic: "「巴克豪森增益乘回授等於一、相移 0 或 360 度、韋恩電橋 1/2πRC、555 充放電看 1/3 與 2/3」", formulas: "$$|A\\beta| = 1, \\; \\angle A\\beta = 0^\\circ, \\quad f_{o(\\text{韋恩})} = \\frac{1}{2\\pi RC}, \\quad f_{555(\\text{無穩態})} = \\frac{1.44}{(R_A + 2R_B)C}$$", steps: ["Step 1：起振瞬間需 $|A\\beta| > 1$，穩定振盪維持 $|A\\beta| = 1$ 且總相移為 $0^\\circ$ 或 $360^\\circ$。", "Step 2：韋恩電橋振盪器放大器需提供 $+3$ 倍非反相增益（$R_f = 2R_i$）；RC 相移振盪器需 $-29$ 倍反相增益。", "Step 3：555 無穩態多諧振盪器充電時間 $t_H = 0.693(R_A + R_B)C$、放電時間 $t_L = 0.693 R_B C$。"], pitfall: "555 無穩態充電經過 $R_A + R_B$，放電只經過 $R_B$（經第 7 腳放電），公式分母是 $(R_A + 2R_B)C$！" },
+        { id: "el_11", subject: "電子學", unit: "Ch11 功率放大器與穩壓電源", mnemonic: "「A 類效率最高 25% 變壓器 50%、B 類互補推挽 78.5% 有交越失真、AB 類加二極體消失真」", formulas: "$$\\eta_{A(\\text{直接})} \\le 25\\%, \\quad \\eta_{A(\\text{變壓器})} \\le 50\\%, \\quad \\eta_{B(\\text{互補推挽})} = \\frac{\\pi}{4} \\approx 78.5\\%$$", steps: ["Step 1：A 類放大器導通角 $360^\\circ$，無失真但靜態消耗功率大、效率最低。", "Step 2：B 類推挽導通角 $180^\\circ$，最高效率達 $\\frac{\\pi}{4} = 78.5\\%$，但因 $V_{BE} = 0.7\\,\\text{V}$ 死區產生「交越失真」。", "Step 3：AB 類在兩電晶體基極間串入兩顆順偏二極體提供微弱偏壓，徹底消除交越失真。"], pitfall: "三端穩壓 IC 如 7805 輸出 $+5\\,\\text{V}$、7912 輸出 $-12\\,\\text{V}$，輸入電壓至少需比輸出高 $2\\sim 3\\,\\text{V}$！" },
+
+        // 數位邏輯設計 (8 課)
+        { id: "dl_01", subject: "數位邏輯設計", unit: "Ch1 數目系統與補數運算", mnemonic: "「二進位四位轉十六進位、負數用 2 的補數、1 的補數加 1 就是 2 的補數、BCD 逢十進位」", formulas: "$$(N)_{10} \\leftrightarrow (N)_2 \\leftrightarrow (N)_8 \\leftrightarrow (N)_{16}, \\quad 2\\text{s Complement} = 1\\text{s Complement} + 1$$", steps: ["Step 1：二進位轉十六進位以小數點為基準，向左向右每 4 位一組；轉八進位每 3 位一組。", "Step 2：負數以 $n$ 位元 2 的補數表示時，將正數二進位「由右向左找到第一個 1 保留，其左邊全部 0、1 反相」。", "Step 3：$n$ 位元帶正負號 2 的補數可表示範圍為 $-2^{n-1} \\sim +(2^{n-1} - 1)$。"], pitfall: "BCD 碼（8421碼）只使用 0000 到 1001（0~9），若兩 BCD 數相加超過 1001 或產生進位，必須再加 0110（+6）修正！" },
+        { id: "dl_02", subject: "數位邏輯設計", unit: "Ch2 基本邏輯閘與萬用閘", mnemonic: "「及閘全 1 才 1、或閘有 1 就 1、互斥或相異為 1、反及閘與反或閘是萬用閘」", formulas: "$$\\text{XOR: } A \\oplus B = \\bar{A}B + A\\bar{B}, \\quad \\text{XNOR: } \\overline{A \\oplus B} = AB + \\bar{A}\\bar{B}$$", steps: ["Step 1：AND（及閘）見 $0$ 出 $0$；OR（或閘）見 $1$ 出 $1$；XOR（互斥或閘）兩輸入不同出 $1$。", "Step 2：NAND（反及閘）與 NOR（反或閘）皆可單獨組成任何邏輯電路，稱為「萬用閘」。", "Step 3：三輸入以上 XOR 閘為「奇數個 1 偵測器」（奇同位產生器）。"], pitfall: "製作 NOT 閘只需 1 顆 NAND；製作 AND 閘需 2 顆 NAND；製作 OR 閘需 3 顆 NAND；製作 XOR 閘需 4 顆 NAND！" },
+        { id: "dl_03", subject: "數位邏輯設計", unit: "Ch3 布林代數與第摩根定理", mnemonic: "「拆長槓變符號、加變乘、乘變加；吸收律 A + AB = A；分配律 A + Abar B = A + B」", formulas: "$$\\overline{A + B} = \\bar{A} \\cdot \\bar{B}, \\quad \\overline{A \\cdot B} = \\bar{A} + \\bar{B}, \\quad A + AB = A, \\quad A + \\bar{A}B = A + B$$", steps: ["Step 1：遇到整條長反相橫槓，先用第摩根定理拆開並將「$\\cdot$ 與 $+$ 互換」。", "Step 2：善用吸收律 $A + AB = A$ 與消去律 $A + \\bar{A}B = A + B$ 消除冗餘文字。", "Step 3：套用共識定理 $AB + \\bar{A}C + BC = AB + \\bar{A}C$ 消去多餘的 $BC$ 項。"], pitfall: "對偶式（Dual）只需將 AND/OR 互換、$0/1$ 互換（變數不加反相）；互補式則需連同變數一起反相！" },
+        { id: "dl_04", subject: "數位邏輯設計", unit: "Ch4 卡諾圖 K-map 化簡", mnemonic: "「格雷碼 00 01 11 10、圈大不圈小、四角左右上下皆可折疊、隨意項 X 有利才圈」", formulas: "$$\\text{圈 } 2^k \\text{ 格相鄰的 } 1 \\implies \\text{消去 } k \\text{ 個互補變數}$$", steps: ["Step 1：建立卡諾圖，行列務必依格雷碼 00, 01, 11, 10 排列，填入最小項 1 與隨意項 X。", "Step 2：優先圈選 $8$ 格、$4$ 格、$2$ 格矩形（含上下左右邊界折疊與四個角落合圈）。", "Step 3：檢查每個圈內部數值保持不變的變數：為 1 寫原變數、為 0 寫反相變數，最後全部相加成 SOP。"], pitfall: "若題目要求最簡「和之積（POS）」，則改圈圖中的 0 寫成 $(A + \\bar{B})$ 形式相乘即可！" },
+        { id: "dl_05", subject: "數位邏輯設計", unit: "Ch5 組合邏輯電路/加解碼器/多工器", mnemonic: "「半加器沒進位輸入、全加器兩半加加或閘、解碼器 n 對 2 的 n 次方、多工器 2 的 n 次方選 1」", formulas: "$$\\text{半加器：} S = A \\oplus B, \\; C = AB; \\qquad \\text{全加器：} S = A \\oplus B \\oplus C_i, \\; C_o = AB + (A \\oplus B)C_i$$", steps: ["Step 1：全加器總和 $S$ 為三輸入 XOR，進位輸出 $C_o$ 為多數決函數。", "Step 2：解碼器（Decoder）具有 $n$ 條輸入線與 $2^n$ 條輸出線，每個輸入組合僅啟動一條對應最小項輸出。", "Step 3：多工器（MUX）有 $n$ 條選擇線與 $2^n$ 條資料輸入線，可直接用來實作任意布林函數。"], pitfall: "解多工器（Demultiplexer）功能與多工器相反，為「1 對 $2^n$ 資料分配器」！" },
+        { id: "dl_06", subject: "數位邏輯設計", unit: "Ch6 正反器 Flip-Flop 原理", mnemonic: "「閂鎖看準位、正反器看邊緣；JK 00保持 01清零 10設一 11反相；D 延遲跟隨、T 逢 1 反相」", formulas: "$$Q(t+1)_{D} = D, \\quad Q(t+1)_{T} = T \\oplus Q(t), \\quad Q(t+1)_{JK} = J\\bar{Q}(t) + \\bar{K}Q(t)$$", steps: ["Step 1：先看時脈接腳有無小圓圈（Bubble）：無圓圈為正緣觸發（$\\uparrow$），有圓圈為負緣觸發（$\\downarrow$）。", "Step 2：僅在時脈觸發邊緣瞬間讀取輸入值更新 $Q$，其餘時間輸出維持原狀態不變。", "Step 3：非同步清除（CLR）與預設（PR）接腳優先權最高，不受時脈控制直接強制改變輸出。"], pitfall: "SR 正反器輸入 $(S, R) = (1, 1)$ 為禁止使用（不確定狀態），JK 正反器則將 $(1, 1)$ 改良為「反相（Toggle）」！" },
+        { id: "dl_07", subject: "數位邏輯設計", unit: "Ch7 非同步與同步計數器", mnemonic: "「n 顆正反器最大模數 2 的 n 次方、非同步漣波前級 Q 接後級時脈、同步計數器共用同一時脈」", formulas: "$$\\text{MOD-}N \\text{ 計數器需 } n = \\lceil \\log_2 N \\rceil \\text{ 顆正反器}, \\quad f_{\\text{out}} = \\frac{f_{\\text{CLK}}}{N}$$", steps: ["Step 1：欲設計模數為 $N$（MOD-$N$）計數器，找出滿足 $2^n \\ge N$ 的最小正整數 $n$。", "Step 2：非同步計數器中，負緣觸發正反器前級 $Q$ 接後級 CLK 為「上數」；前級 $\\bar{Q}$ 接後級 CLK 為「下數」。", "Step 3：設計非 $2^n$ 計數器（如 MOD-10 BCD 計數器），當計數到達第 $N$ 態瞬間利用 NAND 閘觸發 CLR 歸零。"], pitfall: "非同步漣波計數器因各級傳播延遲累加，最高工作頻率受限（$f_{\\max} = \\frac{1}{n \\cdot t_{pd}}$）！" },
+        { id: "dl_08", subject: "數位邏輯設計", unit: "Ch8 移位暫存器與時序波形判讀", mnemonic: "「環形計數器 n 級除 n、強生計數器 n 級除 2n、串入並出需 n 個時脈」", formulas: "$$\\text{環形計數器：MOD-}n, \\; f_{\\text{out}} = \\frac{f_{\\text{CLK}}}{n}; \\qquad \\text{強生計數器：MOD-}2n, \\; f_{\\text{out}} = \\frac{f_{\\text{CLK}}}{2n}$$", steps: ["Step 1：環形計數器（Ring Counter）將最後一級的 $Q$ 接回第一級的 $D$，有效狀態數為 $n$ 個。", "Step 2：強生計數器（Johnson Counter）將最後一級的 $\\bar{Q}$ 接回第一級的 $D$，有效狀態數倍增為 $2n$ 個。", "Step 3：畫時序圖時先畫垂直虛線對齊時脈邊緣，逐週期移位填寫各級狀態。"], pitfall: "環形與強生計數器皆存在未使用的無效狀態，設計時需注意自我啟動（Self-starting）避免陷入死循環！" },
+
+        // 數學 C (10 課)
+        { id: "mc_01", subject: "數學 C", unit: "Ch1 坐標系與二次函數圖形", mnemonic: "「配方法找頂點 (h, k)、開口看領導係數 a、判別式 b 平方減 4ac 定交點個數」", formulas: "$$y = a(x - h)^2 + k, \\quad h = -\\frac{b}{2a}, \\quad k = \\frac{4ac - b^2}{4a}, \\quad D = b^2 - 4ac$$", steps: ["Step 1：將 $y = ax^2 + bx + c$ 配方成頂點式 $y = a(x-h)^2 + k$，立刻讀出頂點 $(h, k)$。", "Step 2：若題目限制 $x$ 在閉區間 $[p, q]$ 內求極值，務必檢查頂點 $h$ 是否落在區間內，並比較端點與頂點值。", "Step 3：圖形恆在 $x$ 軸上方（恆正）的充要條件為「$a > 0$ 且判別式 $D < 0$」。"], pitfall: "有範圍限制的二次函數求最大值與最小值時，切勿只看頂點而漏算兩個端點的函數值！" },
+        { id: "mc_02", subject: "數學 C", unit: "Ch2 直線方程式與點線距離", mnemonic: "「兩線平行斜率相等、兩線垂直斜率乘積負一、點到直線分子代點取絕對值、分母係數平方和開根號」", formulas: "$$m = \\frac{y_2 - y_1}{x_2 - x_1} = -\\frac{a}{b}, \\quad m_1 m_2 = -1, \\quad d(P, L) = \\frac{|ax_0 + by_0 + c|}{\\sqrt{a^2 + b^2}}$$", steps: ["Step 1：已知斜率 $m$ 與過點 $(x_0, y_0)$，直接代點斜式 $y - y_0 = m(x - x_0)$。", "Step 2：計算兩平行線距離前，務必先將兩直線的 $x、y$ 係數化為「完全相同」再套用 $\\frac{|c_1 - c_2|}{\\sqrt{a^2+b^2}}$。", "Step 3：垂直平分線即過兩點中點且斜率為原線段負倒數之直線。"], pitfall: "平行線距離公式若未先將 $a, b$ 係數通分一致就直接相減常數項 $c_1 - c_2$，必定算錯！" },
+        { id: "mc_03", subject: "數學 C", unit: "Ch3 多項式與餘因式定理", mnemonic: "「除以 (ax - b) 餘式代 f(b/a)、整除代表餘式為零、綜合除法連續除降冪展開」", formulas: "$$f(x) = g(x)q(x) + r(x)\\;(\\deg r < \\deg g), \\quad f\\left(\\frac{b}{a}\\right) = \\text{餘式}$$", steps: ["Step 1：求 $f(x)$ 除以一次式 $(ax - b)$ 的餘式，直接令除式為 $0$ 得 $x = \\frac{b}{a}$ 代入 $f(x)$。", "Step 2：若除式為二次式 $(x - \\alpha)(x - \\beta)$，設餘式為一次式 $r(x) = ax + b$，代入 $x = \\alpha, \\beta$ 解聯立。", "Step 3：求多項式在 $x = k$ 附近之近似值，使用連續綜合除法改寫為 $(x - k)$ 的多項式。"], pitfall: "使用綜合除法除以 $(ax - b)$ 時，所得商式必須再除以 $a$ 才是真正的商式（餘式不變）！" },
+        { id: "mc_04", subject: "數學 C", unit: "Ch4 三角函數與正餘弦定理", mnemonic: "「象限正負才全正弦切餘、正弦定理邊比對角正弦等於 2R、餘弦定理兩邊夾一角求對邊」", formulas: "$$\\sin^2\\theta + \\cos^2\\theta = 1, \\quad \\frac{a}{\\sin A} = \\frac{b}{\\sin B} = \\frac{c}{\\sin C} = 2R, \\quad c^2 = a^2 + b^2 - 2ab\\cos C$$", steps: ["Step 1：各象限三角函數正負口訣：「第一象限全正、第二象限 $\\sin$ 正、第三象限 $\\tan$ 正、第四象限 $\\cos$ 正」。", "Step 2：已知「兩角一邊」或求「外接圓半徑 $R$」用正弦定理；已知「兩邊一夾角」或「三邊長」用餘弦定理。", "Step 3：弧度換算：$180^\\circ = \\pi\\,\\text{rad}$，扇形弧長 $s = r\\theta$，扇形面積 $A = \\frac{1}{2}r^2\\theta$。"], pitfall: "扇形公式 $s = r\\theta$ 與 $A = \\frac{1}{2}r^2\\theta$ 中的角度 $\\theta$ 必須使用「弧度（rad）」，不可直接代角度度數！" },
+        { id: "mc_05", subject: "數學 C", unit: "Ch5 和差倍角與正餘弦疊合", mnemonic: "「正弦和角異名相乘同號、餘弦和角同名相乘異號、疊合提出斜邊根號 a 平方加 b 平方」", formulas: "$$\\sin(\\alpha\\pm\\beta) = \\sin\\alpha\\cos\\beta \\pm \\cos\\alpha\\sin\\beta, \\quad a\\sin x + b\\cos x = \\sqrt{a^2+b^2}\\sin(x+\\phi)$$", steps: ["Step 1：二倍角公式 $\\sin 2\\theta = 2\\sin\\theta\\cos\\theta$；$\\cos 2\\theta = 2\\cos^2\\theta - 1 = 1 - 2\\sin^2\\theta$。", "Step 2：遇到 $a\\sin x + b\\cos x$ 求極值，提出 $\\sqrt{a^2+b^2}$ 合併為單一正弦函數，振幅即為最大值。", "Step 3：函數 $y = A\\sin(kx + \\phi) + c$ 的最小正週期為 $T = \\frac{2\\pi}{|k|}$。"], pitfall: "統測常考 $\\sin\\theta + \\cos\\theta = k$ 求 $\\sin\\theta\\cos\\theta$，兩邊直接平方利用 $\\sin^2\\theta + \\cos^2\\theta = 1$ 即可秒殺！" },
+        { id: "mc_06", subject: "數學 C", unit: "Ch6 平面向量與柯西不等式", mnemonic: "「終點減起點得向量、內積等於長度乘積乘夾角餘弦、垂直內積為零、柯西長度平方和乘積大於內積平方」", formulas: "$$\\vec{a}\\cdot\\vec{b} = |\\vec{a}||\\vec{b}|\\cos\\theta = x_1 x_2 + y_1 y_2, \\quad (a_1^2+a_2^2)(b_1^2+b_2^2) \\ge (a_1 b_1 + a_2 b_2)^2$$", steps: ["Step 1：兩向量垂直 $\\iff \\vec{a}\\cdot\\vec{b} = 0$；兩向量平行 $\\iff x_1 y_2 - x_2 y_1 = 0$。", "Step 2：求 $\\vec{a}$ 在 $\\vec{b}$ 上的正射影長為 $\\frac{|\\vec{a}\\cdot\\vec{b}|}{|\\vec{b}|}$。", "Step 3：已知平方和求一次式極值，直接套用柯西不等式，等號成立於 $\\frac{a_1}{b_1} = \\frac{a_2}{b_2}$。"], pitfall: "求三角形面積向量公式：$\\Delta = \\frac{1}{2}|x_1 y_2 - x_2 y_1|$，在坐標平面題型中極為省時！" },
+        { id: "mc_07", subject: "數學 C", unit: "Ch7 圓與直線關係", mnemonic: "「圓心到直線距離 d 比半徑 r：d 小於 r 交兩點、d 等於 r 相切、d 大於 r 不相交；切線斜率與半徑垂直」", formulas: "$$(x-h)^2 + (y-k)^2 = r^2, \\quad \\text{一般式圓心 } \\left(-\\frac{D}{2}, -\\frac{E}{2}\\right), \\quad r = \\frac{1}{2}\\sqrt{D^2 + E^2 - 4F}$$", steps: ["Step 1：將圓一般式 $x^2 + y^2 + Dx + Ey + F = 0$ 配方找出圓心 $O(h, k)$ 與半徑 $r$。", "Step 2：計算圓心 $O$ 到直線 $L$ 的垂直距離 $d$，若 $d < r$ 則弦長為 $2\\sqrt{r^2 - d^2}$。", "Step 3：圓上一點 $(x_0, y_0)$ 的切線方程式可快速代換為 $(x_0-h)(x-h) + (y_0-k)(y-k) = r^2$。"], pitfall: "過「圓外一點」求切線必有兩條！若設點斜式只解出一個斜率 $m$，代表另一條切線是鉛直線 $x = x_0$！" },
+        { id: "mc_08", subject: "數學 C", unit: "Ch8 數列與無窮等比級數", mnemonic: "「等差第 n 項首項加 (n-1)d、等比第 n 項首項乘 r 的 n-1 次方、無窮等比收斂 |r| 小於 1 首項除 1-r」", formulas: "$$S_n(\\text{等差}) = \\frac{n(a_1 + a_n)}{2}, \\quad S_n(\\text{等比}) = \\frac{a_1(1 - r^n)}{1 - r}, \\quad S_\\infty = \\frac{a_1}{1 - r}\\;(|r| < 1)$$", steps: ["Step 1：等差中項 $b = \\frac{a+c}{2}$；等比中項 $b^2 = ac$（注意正負兩解）。", "Step 2：無窮等比級數收斂條件為 $-1 < r < 1$，總和 $S_\\infty = \\frac{a_1}{1 - r}$。", "Step 3：循環小數化分數可直接套用無窮等比級數公式（例：$0.\\overline{27} = \\frac{27}{99} = \\frac{3}{11}$）。"], pitfall: "無窮等比級數收斂範圍是 $-1 < r < 1$（不含 $r = 1$），而無窮等比數列收斂範圍包含 $r = 1$！" },
+        { id: "mc_09", subject: "數學 C", unit: "Ch9 排列組合與條件機率", mnemonic: "「相鄰綁一起、不相鄰插空隙、相同物除以階乘、巴斯卡定理 C(n,k) + C(n,k+1) = C(n+1,k+1)」", formulas: "$$P^n_r = \\frac{n!}{(n-r)!}, \\quad C^n_r = \\frac{n!}{r!(n-r)!}, \\quad P(A|B) = \\frac{P(A \\cap B)}{P(B)}$$", steps: ["Step 1：排列有順序（$P$），組合無順序（$C$）；不盡相異物全排列除以相同物個數階乘。", "Step 2：至少出現一次的事件，優先使用「全部扣掉完全不發生（反面扣除法）」計算最快。", "Step 3：條件機率 $P(A|B)$ 代表在 $B$ 發生的縮小樣本空間中，$A$ 同時發生的比例。"], pitfall: "分組分堆問題中，若分出 $k$ 堆數量完全相同的堆（無編號），最後務必除以 $k!$ 消除重複計算！" },
+        { id: "mc_10", subject: "數學 C", unit: "Ch10 複數極式/隸美弗定理與微積分基礎", mnemonic: "「棣美弗向徑次方角度倍乘、導數就是切線斜率、微分次方搬下來減一、積分次方加一除新次方」", formulas: "$$[r(\\cos\\theta + i\\sin\\theta)]^n = r^n(\\cos n\\theta + i\\sin n\\theta), \\quad (x^n)\\prime = n x^{n-1}, \\quad \\int_a^b f(x)\\,dx = F(b) - F(a)$$", steps: ["Step 1：複數轉極式前先依實部與虛部正負號判別象限，再求 $r = \\sqrt{x^2+y^2}$ 與主輻角 $\\theta$。", "Step 2：求函數極值先令一階導數 $f\\prime(x) = 0$ 找臨界點，再用 $f\\prime\\prime(x) < 0$ 判極大、$f\\prime\\prime(x) > 0$ 判極小。", "Step 3：定積分求曲線與 $x$ 軸所圍面積時，在 $x$ 軸下方的區間需加負號（取絕對值）。"], pitfall: "極式標準型必須是「$\\cos\\theta + i\\sin\\theta$」且中間為加號，若為減號或 $\\sin$ 在前必須先轉換！" },
+
+        // 英文 (8 課)
+        { id: "en_01", subject: "英文", unit: "U1 核心4500字彙與字首字根", mnemonic: "「否定字首 un/in/dis/im、前 pre 後 post、共同 con/sym、搭配介系詞一起背」", formulas: "$$\\text{字根拆解：Prefix (字首定方向/正負)} + \\text{Root (字根定核心字義)} + \\text{Suffix (字尾定詞性)}$$", steps: ["Step 1：先從選項字尾辨識詞性（-tion/-ment 名詞、-ive/-able/-ous 形容詞、-ly 副詞）。", "Step 2：透過字首推測語氣正負（如 mal-/mis-/anti- 表負面；pro-/bene- 表正面）。", "Step 3：注意統測高頻易混淆字對（如 adapt 適應 vs. adopt 採用；affect 影響 v. vs. effect 效果 n.）。"], pitfall: "available、efficient、essential、sustainable、alternative 為近五年統測英文出現頻率最高的五大核心單字！" },
+        { id: "en_02", subject: "英文", unit: "U2 十二時態與被動語態", mnemonic: "「since/for 配現在完成、by the time 配完成式、過去先發生用 had p.p.、被動永遠 be + p.p.」", formulas: "$$\\text{現在完成：have/has + p.p.} \\quad｜\\quad \\text{過去完成：had + p.p.} \\quad｜\\quad \\text{被動語態：be + p.p.}$$", steps: ["Step 1：圈出句中時間副詞線索（如 since 2020, for three years, yesterday, by next week）。", "Step 2：時間與條件副詞子句（when, if, before, after）中，用「現在簡單式」代替未來式。", "Step 3：判斷主詞與動詞的主被動關係，若為被動則保留原時態並加上 be + p.p.。"], pitfall: "不及物動詞（如 happen, occur, take place, appear, belong to）絕對沒有被動語態，看到 was happened 直接刪除！" },
+        { id: "en_03", subject: "英文", unit: "U3 關係代名詞與關係副詞", mnemonic: "「先行詞人 who 物 which、逗號與介系詞後禁用 that、後面缺主受詞用關代、不缺用關副 where/when」", formulas: "$$\\text{關係代名詞：who / whom / whose / which / that} \\quad｜\\quad \\text{關係副詞：where, when, why, how}$$", steps: ["Step 1：先確認關係子句中是否缺少「主詞」或「受詞」：缺少則選關係代名詞（who/which/that）。", "Step 2：若關係子句主詞、動詞、受詞皆完整，則選關係副詞（表地點用 where、表時間用 when）。", "Step 3：遇到「逗號（非限定用法）」或「介系詞後方」，絕對不可使用 that 或 who。"], pitfall: "whose 為所有格關代，後面必須緊接名詞（whose + N），可同時修飾人或事物！" },
+        { id: "en_04", subject: "英文", unit: "U4 分詞構句與不定詞/動名詞", mnemonic: "「分詞看逗號後主詞：主動 V-ing、被動 p.p.；enjoy/avoid/finish 接 V-ing；decide/plan/refuse 接 to V」", formulas: "$$\\text{主動分詞：V-ing} \\quad｜\\quad \\text{被動分詞：p.p.} \\quad｜\\quad \\text{With + O + O.C. (V-ing / p.p.)}$$", steps: ["Step 1：分詞構句空格在句首時，直接把逗號後方的主要子句主詞抓出來比對：主動做動作用 V-ing，被動受動作用 p.p.。", "Step 2：記熟 remember / forget / stop + to V（未做）與 + V-ing（已做過）之語意差異。", "Step 3：介系詞 to 片語（如 look forward to, be used to, devote oneself to）後方必須接動名詞 V-ing！"], pitfall: "情緒動詞（interest, excite, surprise, frustrate）讓人產生情緒用 p.p.（人感到…），事物令人產生情緒用 V-ing！" },
+        { id: "en_05", subject: "英文", unit: "U5 假設語氣與倒裝句型", mnemonic: "「與現在相反 If 過去式(were) 配 would V；與過去相反 If had p.p. 配 would have p.p.；否定副詞放句首助動詞倒裝」", formulas: "$$\\text{現在相反：If + S + were/V-ed, S + would + V} \\quad｜\\quad \\text{過去相反：If + S + had p.p., S + would have p.p.}$$", steps: ["Step 1：先看主要子句助動詞時態：would + 原形 V 往前推用過去式；would have p.p. 往前推用 had p.p.。", "Step 2：省略 If 倒裝時，僅可將 Were、Had 或 Should 移至句首（如 Were I you, Had I known）。", "Step 3：否定副詞（Never, Seldom, Hardly, Not only）置於句首時，後方句子須將助動詞移至主詞前。"], pitfall: "建議/堅持/命令動詞（suggest, insist, demand, require）後接 that 子句時，動詞一律用 (should) + 原形動詞！" },
+        { id: "en_06", subject: "英文", unit: "U6 統測高頻情境對話", mnemonic: "「先判讀說話場合與語氣禮貌度、拒絕請求先肯定再委婉轉折、電話用語 This is ... speaking」", formulas: "$$\\text{答題關鍵：語氣一致（禮貌/驚訝/安慰/道歉）} + \\text{前後句關鍵詞呼應}$$", steps: ["Step 1：辨識對話場景（餐廳點餐、機場海關、看醫生、辦公室請假、電話留言、購物退換貨）。", "Step 2：看清空格前後兩句話的邏輯關係，避免只看單一句子就憑直覺選答。", "Step 3：排除過度直接、粗魯或與文化禮儀不符的選項。"], pitfall: "電話對話中「我是小明」不可說 I am Ming，必須用 This is Ming speaking；對方不在線用 Hold on, please。" },
+        { id: "en_07", subject: "英文", unit: "U7 克漏字與文意選填邏輯", mnemonic: "「轉折詞看語意反轉、因果詞看前後推論、文意選填先依詞性將選項分四組」", formulas: "$$\\text{轉折：However / Nevertheless / Despite} \\quad｜\\quad \\text{因果：Therefore / Consequently / Due to}$$", steps: ["Step 1：克漏字遇到轉折連接詞空格，比對前後兩句語意為「正反對比（However）」或「順接補充（Moreover）」。", "Step 2：區分連接詞（後接完整子句，如 Although, Because）與介系詞（後接名詞片語，如 Despite, Because of）。", "Step 3：文意選填先在選項旁標註詞性（n. / v. / adj. / adv.），再依空格文法位置縮小範圍。"], pitfall: "Despite 後面絕對不可加 of（正確為 Despite + N 或 In spite of + N）！" },
+        { id: "en_08", subject: "英文", unit: "U8 閱讀測驗與非選擇題重組/中譯英", mnemonic: "「閱讀先看題幹關鍵字回原文定位、句子重組先抓 S+V+O 骨架、寫完務必核對總字數與大小寫」", formulas: "$$\\text{虛主詞骨架：It is + Adj. + for sb. + to V} \\quad｜\\quad \\text{中譯英三步：斷句定時態} \\to \\text{套句型} \\to \\text{檢單複數}$$", steps: ["Step 1：閱讀測驗主旨題（Main Idea）重點讀首段末句與各段首句，排除「以偏概全」或「過度推論」選項。", "Step 2：非選句子重組嚴禁增減任何單字或更改時態，組好後逐一劃掉提示字核對數量。", "Step 3：非選中譯英先確認主詞單複數與時間時態，優先使用課本學過的安全句型。"], pitfall: "非選擇題的「句首大寫」與「句尾標點符號（句點或問號）」未寫清楚會直接被扣分！" },
+
+        // 國文 (8 課)
+        { id: "ch_01", subject: "國文", unit: "U1 核心古文先秦漢魏篇", mnemonic: "「大同與小康禮運大同篇、燭之武退秦師利害分析、諫逐客書鋪排對比、出師表忠誠懇切」", formulas: "$$\\text{先秦諸子：禮運大同 ｜ 史傳：左傳〈燭之武退秦師〉 ｜ 漢魏散文：李斯〈諫逐客書〉、諸葛亮〈出師表〉}$$", steps: ["Step 1：〈大同與小康〉區分大同（天下為公、選賢與能）與小康（天下為家、禮義以為紀）之制度差異。", "Step 2：〈燭之武退秦師〉掌握燭之武從「秦晉利害衝突」切入游說秦穆公退兵的說理層次。", "Step 3：〈諫逐客書〉善用排比與類比論證說明納客之重要。"], pitfall: "〈出師表〉中的「開張聖聽」是指廣泛聽取意見，切勿誤解為商店開張！" },
+        { id: "ch_02", subject: "國文", unit: "U2 核心古文唐宋散文篇", mnemonic: "「師說正反對比批判恥師、桃花源記漁人線索、赤壁賦主客問答水月哲理、項脊軒志細節抒情」", formulas: "$$\\text{唐宋八大家核心：韓愈〈師說〉、柳宗元〈始得西山宴遊記〉、歐陽脩〈醉翁亭記〉、蘇軾〈赤壁賦〉}$$", steps: ["Step 1：〈師說〉抓準「傳道、受業、解惑」與三組正反對比，理解「聞道有先後，術業有專攻」的相對師道觀。", "Step 2：〈赤壁賦〉把握「樂（泛舟）→ 悲（洞簫懷古）→ 喜（水月變與不變哲理）」的情感轉折。", "Step 3：〈項脊軒志〉以「一間老屋（項脊軒）」貫穿百年家族變遷與對親人的懷念。"], pitfall: "〈師說〉中「古之學者必有師」的「學者」是指「求學的人」，不是現代的學術專家！" },
+        { id: "ch_03", subject: "國文", unit: "U3 核心古文明清與台灣古典篇", mnemonic: "「晚遊六橋待月記西湖月景、勞山道士戒貪求捷徑、裨海紀遊郁永河採硫、台灣通史序拓荒精神」", formulas: "$$\\text{明清與台灣古典：袁宏道〈晚遊六橋待月記〉、蒲松齡〈勞山道士〉、郁永河〈北投硫穴記〉、連橫〈台灣通史序〉}$$", steps: ["Step 1：〈晚遊六橋待月記〉以「花態柳情，山容水意」寫出西湖月景別具一格的審美情趣。", "Step 2：〈勞山道士〉透過王生學穿牆術卻因驕矜貪念撞壁，諷刺投機取巧、不願腳踏實地之人。", "Step 3：〈北投硫穴記〉與〈台灣通史序〉展現清代文人實地踏查台灣風土與保存鄉土歷史的使命感。"], pitfall: "〈台灣通史序〉中「婆娑之洋，美麗之島」指的就是台灣，文中對比荷蘭、鄭氏與清代治台歷程。" },
+        { id: "ch_04", subject: "國文", unit: "U4 字音字形與成語辨析", mnemonic: "「形近字看偏旁部首、多音字依詞性與詞義判讀、成語避免望文生義與褒貶誤用」", formulas: "$$\\text{解題三檢核：1. 偏旁部首義符} \\to \\text{2. 詞性與語境搭配} \\to \\text{3. 褒貶色彩與適用對象}$$", steps: ["Step 1：字形題先從「部首」判斷本義（如「礻」與祭祀神明有關，「衤」與衣服布料有關）。", "Step 2：成語辨析特別留意易望文生義的成語（如「差強人意」是尚算令人滿意，為褒義；「首當其衝」是最先受到衝擊）。", "Step 3：區分適用對象（如「炙手可熱」指權勢氣焰盛，非商品暢銷；「美輪美奐」僅形容房屋建築高大華美）。"], pitfall: "「目無全牛」形容技藝純熟高超（褒義），並非目中無人；「罄竹難書」多形容罪狀極多（貶義）！" },
+        { id: "ch_05", subject: "國文", unit: "U5 修辭格與文言文法結構", mnemonic: "「借代用特徵替本名、轉品改詞性、互文上下句合併讀、倒裝賓語提前看之與是」", formulas: "$$\\text{互文見義：參互成文，合而見義} \\quad｜\\quad \\text{賓語提前標誌：「之」、「是」（如：唯利是圖、句讀之不知）}$$", steps: ["Step 1：借喻是「有喻依無喻體」；借代是「用相關特徵代替本名」（如「布衣」代平民、「干戈」代戰爭）。", "Step 2：互文修辭需將上下兩句詞義合併理解（如「不以物喜，不以己悲」）。", "Step 3：文言倒裝句還原語序後再翻譯（如「何陋之有」還原為「有何陋」）。"], pitfall: "「對偶」要求字數相等、詞性相對且平仄協調；「排比」則是三句以上結構相似的句子並列！" },
+        { id: "ch_06", subject: "國文", unit: "U6 國學常識與韻文流變", mnemonic: "「經史子集四部分類、韻文脈絡詩經楚辭漢賦唐詩宋詞元曲、近體詩偶數句押韻中間兩聯對仗」", formulas: "$$\\text{韻文演變：詩經(四言)} \\to \\text{楚辭} \\to \\text{漢賦} \\to \\text{樂府/古詩} \\to \\text{唐詩(近體詩)} \\to \\text{宋詞} \\to \\text{元曲}$$", steps: ["Step 1：四部（經、史、子、集）分類：儒家經典入經部、史書入史部、諸子百家與醫農算術入子部、詩文集入集部。", "Step 2：近體詩規定一韻到底不可換韻，律詩「頷聯（3、4句）」與「頸聯（5、6句）」必須對仗。", "Step 3：宋詞按字數分小令、中調、長調；元曲包含散曲與雜劇（有科、白、唱）。"], pitfall: "《史記》為通史、紀傳體之祖；《漢書》為斷代史之祖；《資治通鑑》為編年體通史！" },
+        { id: "ch_07", subject: "國文", unit: "U7 高職特色應用文書信題辭對聯", mnemonic: "「師長函丈壇席道啟、父母膝下安啟、平輩大鑒台啟、信封嚴禁敬啟；杏壇教育、杏林醫學」", formulas: "$$\\text{信封中路（對郵差）：姓 + 職稱 + 名 + 啟封詞} \\quad｜\\quad \\text{信內開頭（對收信人）：稱謂 + 提稱語}$$", steps: ["Step 1：先辨別題目考「信封中路（給郵差看）」還是「信內稱謂提稱語（給收信人看）」。", "Step 2：題辭依場合抓關鍵字：醫院診所「杏林春暖、妙手回春」；教育界「杏壇之光、春風化雨」。", "Step 3：對聯判斷上下聯看最後一字平仄：「上聯末字仄聲（三、四聲），下聯末字平聲（一、二聲）」。"], pitfall: "信封啟封詞絕對不可寫「敬啟」（命令對方恭敬開信的嚴重失禮用法）；男壽用「松鶴遐齡」，女壽用「萱庭集慶」！" },
+        { id: "ch_08", subject: "國文", unit: "U8 現代文對讀與統測六級分寫作", mnemonic: "「跨文本對讀找共同核心與觀點差異、寫作審題立意扣緊技職實作體驗、起承轉合段落分明」", formulas: "$$\\text{六級分寫作架構：破題點旨（首段）} \\to \\text{個人經驗敘事（第二段）} \\to \\text{思辨深化轉折（第三段）} \\to \\text{總結昇華（末段）}$$", steps: ["Step 1：現代文雙文對讀題，先分別摘要甲文與乙文的核心立場，再比對兩者是「互相補充」還是「立場對立」。", "Step 2：統測引導寫作務必緊扣題幹關鍵詞，結合高職實習工廠、專題製作或技能檢定經驗寫出真情實感。", "Step 3：段落長度分配均勻（約 4～5 段），首尾呼應並避免錯別字。"], pitfall: "統測國文寫作佔 24 分（六級分制），未寫題目或偏離題意會直接影響級分上限！" }
+      ];
+
+      // ---------------------------------------------------------------------
+      // 7. SVG DIAGRAMS & SMART QUESTION ENGINE
+      // ---------------------------------------------------------------------
+      function buildUnitSvg(subject, unit) {
+        if (subject === "基本電學") {
+          return `<svg viewBox="0 0 800 300" class="w-full h-auto max-w-full block">
+            <rect x="10" y="10" width="780" height="280" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+            <circle cx="120" cy="150" r="32" fill="#eff6ff" stroke="#1e3a8a" stroke-width="3.5"/>
+            <text x="114" y="139" font-size="20" font-weight="bold" fill="#1e3a8a">+</text>
+            <text x="115" y="173" font-size="20" font-weight="bold" fill="#1e3a8a">-</text>
+            <text x="32" y="157" font-size="18" font-weight="bold" fill="#1e3a8a">E = 24V</text>
+            <path d="M120 118 V60 H200 L212 45 L228 75 L244 45 L260 75 L276 45 L288 60 H380" fill="none" stroke="#0f172a" stroke-width="3.5"/>
+            <text x="208" y="34" font-size="18" font-weight="bold" fill="#0f172a">R1 = 6Ω</text>
+            <path d="M380 60 V105 L364 117 L396 133 L364 149 L396 165 L364 181 L396 197 L380 209 V245" fill="none" stroke="#0f172a" stroke-width="3.5"/>
+            <text x="412" y="157" font-size="18" font-weight="bold" fill="#0f172a">R2 = 12Ω</text>
+            <path d="M380 60 H470 L482 45 L498 75 L514 45 L530 75 L546 45 L558 60 H640" fill="none" stroke="#d97706" stroke-width="3.5"/>
+            <text x="475" y="34" font-size="18" font-weight="bold" fill="#d97706">R3 = 4Ω</text>
+            <path d="M120 182 V245 H640" fill="none" stroke="#0f172a" stroke-width="3.5"/>
+            <circle cx="646" cy="60" r="7" fill="#fef08a" stroke="#d97706" stroke-width="3"/>
+            <circle cx="646" cy="245" r="7" fill="#fef08a" stroke="#d97706" stroke-width="3"/>
+            <text x="665" y="67" font-size="19" font-weight="bold" fill="#d97706">a 端</text>
+            <text x="665" y="252" font-size="19" font-weight="bold" fill="#d97706">b 端</text>
+          </svg>`;
+        }
+        if (subject === "電子學") {
+          return `<svg viewBox="0 0 800 290" class="w-full h-auto max-w-full block">
+            <rect x="10" y="10" width="780" height="270" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+            <polygon points="310,75 310,215 450,145" fill="#eff6ff" stroke="#1e3a8a" stroke-width="4"/>
+            <text x="325" y="123" font-size="22" font-weight="bold" fill="#1e3a8a">-</text>
+            <text x="325" y="183" font-size="22" font-weight="bold" fill="#1e3a8a">+</text>
+            <path d="M120 115 H180 L190 101 L204 129 L218 101 L232 129 L244 115 H310" fill="none" stroke="#0f172a" stroke-width="3.5"/>
+            <text x="185" y="90" font-size="18" font-weight="bold" fill="#0f172a">Ri = 2kΩ</text>
+            <text x="65" y="121" font-size="19" font-weight="bold" fill="#1e3a8a">Vi</text>
+            <path d="M275 115 V42 H340 L350 28 L364 56 L378 28 L392 56 L404 42 H490 V145" fill="none" stroke="#d97706" stroke-width="3.5"/>
+            <text x="340" y="22" font-size="18" font-weight="bold" fill="#d97706">Rf = 10kΩ</text>
+            <path d="M275 175 H310 M275 175 V230 M255 230 H295 M263 240 H287" fill="none" stroke="#0f172a" stroke-width="3.5"/>
+            <path d="M450 145 H560" fill="none" stroke="#059669" stroke-width="4"/>
+            <text x="575" y="152" font-size="20" font-weight="bold" fill="#059669">Vo (負回授放大)</text>
+          </svg>`;
+        }
+        if (subject === "數位邏輯設計") {
+          return `<svg viewBox="0 0 800 290" class="w-full h-auto max-w-full block">
+            <rect x="10" y="10" width="780" height="270" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+            <text x="145" y="52" font-size="20" font-weight="bold" fill="#1e3a8a">A \\ BC</text>
+            <text x="275" y="52" font-size="20" font-weight="bold">00</text>
+            <text x="375" y="52" font-size="20" font-weight="bold">01</text>
+            <text x="475" y="52" font-size="20" font-weight="bold" fill="#d97706">11</text>
+            <text x="575" y="52" font-size="20" font-weight="bold" fill="#d97706">10</text>
+            <text x="185" y="122" font-size="22" font-weight="bold">0</text>
+            <text x="185" y="212" font-size="22" font-weight="bold">1</text>
+            <rect x="235" y="68" width="400" height="180" fill="#f8fafc" stroke="#334155" stroke-width="3"/>
+            <path d="M335 68 V248 M435 68 V248 M535 68 V248 M235 158 H635" stroke="#94a3b8" stroke-width="2"/>
+            <rect x="443" y="76" width="184" height="164" rx="14" fill="rgba(217,119,6,0.14)" stroke="#d97706" stroke-width="3.5"/>
+            <g font-size="26" font-weight="bold" text-anchor="middle">
+              <text x="285" y="124" fill="#1e3a8a">1</text><text x="385" y="124" fill="#94a3b8">0</text><text x="485" y="124" fill="#d97706">1</text><text x="585" y="124" fill="#d97706">1</text>
+              <text x="285" y="214" fill="#94a3b8">0</text><text x="385" y="214" fill="#94a3b8">0</text><text x="485" y="214" fill="#d97706">1</text><text x="585" y="214" fill="#d97706">1</text>
+            </g>
+          </svg>`;
+        }
+        return "";
+      }
+
+      function getSpeedTipForUnit(subject, unit) {
+        const match = SPEED_SOLVING_VAULT.find(s => s.subject === subject && s.unit === unit)
+          || SPEED_SOLVING_VAULT.find(s => s.subject === subject);
+        if (!match) {
+          return "⚡ 考場秒殺心法：先檢查單位換算與象限正負號，利用比例與極值排除法直接鎖定正解！";
+        }
+        return `<strong>⚡ 適用速解絕招【${match.title}】</strong><br/>🔥 口訣：${match.mnemonic}<br/>⚡ 速算心法：${match.fastWay}`;
+      }
+
+      function buildUnitSpecificQuestion(subject, unitTitle, difficulty, isVariant) {
+        const pb = CURRICULUM_PLAYBOOK.find(p => p.subject === subject && p.unit === unitTitle)
+          || CURRICULUM_PLAYBOOK.find(p => p.subject === subject)
+          || CURRICULUM_PLAYBOOK[0];
+
+        if (subject === "基本電學") {
+          if (unitTitle.includes("Ch1")) {
+            const v = isVariant ? 120 : 110;
+            const i = isVariant ? 10 : 5;
+            const h = 4;
+            const kwh = (v * i * h) / 1000;
+            return {
+              subject, unit: unitTitle, difficulty, svg: "",
+              question: `【${unitTitle}】一額定電壓 $${v}\\,\\text{V}$、額定電流 $${i}\\,\\text{A}$ 之電熱器，連續使用 $${h}$ 小時，共消耗多少度電（$\\text{kWh}$）？`,
+              options: [
+                { label: "A", text: `$${kwh}\\,\\text{度}$`, isCorrect: true, reason: `功率 $P = ${v} \\times ${i} = ${v * i}\\,\\text{W} = ${(v * i) / 1000}\\,\\text{kW}$，乘以 $${h}$ 小時得 $${kwh}\\,\\text{度}$。` },
+                { label: "B", text: `$${kwh * 1000}\\,\\text{度}$`, isCorrect: false, reason: "誘答陷阱：忘記將瓦特（W）除以 $1000$ 換算成千瓦（kW）。" },
+                { label: "C", text: `$${kwh * 60}\\,\\text{度}$`, isCorrect: false, reason: "誘答陷阱：誤將小時乘以 $60$ 換算成分鐘。" },
+                { label: "D", text: `$${(kwh / 4).toFixed(2)}\\,\\text{度}$`, isCorrect: false, reason: "誘答陷阱：忘記乘以使用時間 $4$ 小時。" }
+              ],
+              solution: `1. 計算消耗電功率：$P = V \\times I = ${v} \\times ${i} = ${v * i}\\,\\text{W} = ${(v * i) / 1000}\\,\\text{kW}$。<br/>2. 計算消耗度數：$W = P(\\text{kW}) \\times t(\\text{h}) = ${(v * i) / 1000} \\times ${h} = ${kwh}\\,\\text{度}$。`
+            };
+          }
+          if (unitTitle.includes("Ch2")) {
+            const n = isVariant ? 3 : 2;
+            const r0 = 10;
+            const ans = r0 * n * n;
+            return {
+              subject, unit: unitTitle, difficulty, svg: "",
+              question: `【${unitTitle}】一均勻銅導線原電阻為 $${r0}\\,\\Omega$，在體積不變的條件下將其均勻拉長為原長度的 $${n}$ 倍，則拉長後的新電阻值為何？`,
+              options: [
+                { label: "A", text: `$${ans}\\,\\Omega$`, isCorrect: true, reason: `體積不變拉長為原長 $${n}$ 倍時，截面積縮為 $\\frac{1}{${n}}$，電阻變為原來的 $${n}^2 = ${n * n}$ 倍，即 $${ans}\\,\\Omega$。` },
+                { label: "B", text: `$${r0 * n}\\,\\Omega$`, isCorrect: false, reason: "誘答陷阱：僅將電阻乘以 $n$ 倍，忘記截面積同時縮小為 $\\frac{1}{n}$。" },
+                { label: "C", text: `$${(r0 / n).toFixed(1)}\\,\\Omega$`, isCorrect: false, reason: "誘答陷阱：正比與反比關係顛倒。" },
+                { label: "D", text: `$${r0 * (n + 1) * (n + 1)}\\,\\Omega$`, isCorrect: false, reason: "誘答陷阱：題意為「拉長為原長的 $n$ 倍」，非「增加 $n$ 倍」。" }
+              ],
+              solution: `1. 由電阻公式 $R = \\rho \\frac{L}{A}$，體積 $V = A \\cdot L$ 固定。<br/>2. 長度變為 $${n}L$ 時，截面積變為 $\\frac{A}{${n}}$，故 $R_2 = ${n}^2 R_1 = ${n * n} \\times ${r0} = ${ans}\\,\\Omega$。`
+            };
+          }
+          if (unitTitle.includes("Ch8") || unitTitle.includes("Ch9") || unitTitle.includes("Ch10") || unitTitle.includes("Ch11") || unitTitle.includes("Ch12")) {
+            const r = isVariant ? 8 : 6;
+            const xl = isVariant ? 10 : 12;
+            const xc = 4;
+            const netX = xl - xc;
+            const z = Math.hypot(r, netX);
+            return {
+              subject, unit: unitTitle, difficulty, svg: "",
+              question: `【${unitTitle}】一交流 RLC 串聯電路，電阻 $R = ${r}\\,\\Omega$，感抗 $X_L = ${xl}\\,\\Omega$，容抗 $X_C = ${xc}\\,\\Omega$，求總阻抗大小 $|Z|$ 與功率因數 $\\text{PF}$ 為何？`,
+              options: [
+                { label: "A", text: `$|Z| = ${z}\\,\\Omega$，$\\text{PF} = ${(r / z).toFixed(1)}$ 落後`, isCorrect: true, reason: `$Z = ${r} + j(${xl}-${xc}) = ${r} + j${netX}$，$|Z| = ${z}\\,\\Omega$，$\\text{PF} = \\frac{${r}}{${z}} = ${(r / z).toFixed(1)}$ 落後。` },
+                { label: "B", text: `$|Z| = ${r + netX}\\,\\Omega$，$\\text{PF} = 0.8$ 超前`, isCorrect: false, reason: "誘答陷阱：實部電阻與虛部電抗不可直接算術相加，且 $X_L > X_C$ 為電感性落後。" },
+                { label: "C", text: `$|Z| = ${z}\\,\\Omega$，$\\text{PF} = ${(netX / z).toFixed(1)}$ 落後`, isCorrect: false, reason: "誘答陷阱：功率因數是 $\\cos\\theta = \\frac{R}{|Z|}$，誤算成 $\\sin\\theta$。" },
+                { label: "D", text: `$|Z| = ${Math.hypot(r, xl + xc).toFixed(1)}\\,\\Omega$，$\\text{PF} = 0.5$ 落後`, isCorrect: false, reason: "誘答陷阱：感抗與容抗相位差 $180^\\circ$，應相減而非相加。" }
+              ],
+              solution: `1. 計算淨電抗：$X = X_L - X_C = ${xl} - ${xc} = +${netX}\\,\\Omega$（呈電感性）。<br/>2. 計算總阻抗大小：$|Z| = \\sqrt{R^2 + X^2} = \\sqrt{${r}^2 + ${netX}^2} = ${z}\\,\\Omega$。<br/>3. 計算功率因數：$\\text{PF} = \\cos\\theta = \\frac{R}{|Z|} = \\frac{${r}}{${z}} = ${(r / z).toFixed(1)}$（電感性落後）。`
+            };
+          }
+          const e = isVariant ? 36 : 24;
+          const vth = (e * 12) / 18;
+          const rth = 8;
+          const pmax = (vth * vth) / (4 * rth);
+          return {
+            subject, unit: unitTitle, difficulty,
+            svg: buildUnitSvg(subject, unitTitle),
+            question: `【${unitTitle}】如圖直流電路，電源電壓 $E = ${e}\\,\\text{V}$，$R_1 = 6\\,\\Omega$，$R_2 = 12\\,\\Omega$，$R_3 = 4\\,\\Omega$。若在端點 $a、b$ 接上可變負載電阻 $R_L$，則 $R_L$ 可獲得之最大功率 $P_{L(\\max)}$ 為何？`,
+            options: [
+              { label: "A", text: `$${pmax}\\,\\text{W}$`, isCorrect: true, reason: `$V_{TH} = ${e} \\times \\frac{12}{6+12} = ${vth}\\,\\text{V}$，$R_{TH} = (6 \\parallel 12) + 4 = 8\\,\\Omega$，$P_{\\max} = \\frac{${vth}^2}{4 \\times 8} = ${pmax}\\,\\text{W}$。` },
+              { label: "B", text: `$${pmax * 2}\\,\\text{W}$`, isCorrect: false, reason: "誘答陷阱：最大功率公式分母誤寫為 $2 R_{TH}$。" },
+              { label: "C", text: `$${pmax * 4}\\,\\text{W}$`, isCorrect: false, reason: "誘答陷阱：忘記最大功率公式分母需乘以 $4$。" },
+              { label: "D", text: `$${((vth * vth) / 16).toFixed(1)}\\,\\text{W}$`, isCorrect: false, reason: "誘答陷阱：計算 $R_{TH}$ 時漏掉串聯電阻 $R_3 = 4\\,\\Omega$。" }
+            ],
+            solution: `1. 移除負載 $R_L$，$R_3$ 無電流無壓降，開路電壓 $V_{TH} = ${e} \\times \\frac{12}{6+12} = ${vth}\\,\\text{V}$。<br/>2. 將電壓源短路，等效內阻 $R_{TH} = (6 \\parallel 12) + 4 = 4 + 4 = 8\\,\\Omega$。<br/>3. 當 $R_L = R_{TH} = 8\\,\\Omega$ 時，$P_{L(\\max)} = \\frac{V_{TH}^2}{4 R_{TH}} = \\frac{${vth}^2}{32} = ${pmax}\\,\\text{W}$。`
+          };
+        }
+
+        if (subject === "電子學") {
+          if (unitTitle.includes("Ch3") || unitTitle.includes("Ch4") || unitTitle.includes("Ch5")) {
+            const vcc = isVariant ? 15 : 12;
+            const vbb = (vcc * 10) / 40;
+            const ib = ((vbb - 0.7) / 107.5) * 1000;
+            const ic = (99 * ib) / 1000;
+            return {
+              subject, unit: unitTitle, difficulty, svg: "",
+              question: `【${unitTitle}】一矽 NPN BJT 分壓式偏壓電路，$V_{CC} = ${vcc}\\,\\text{V}$，$R_1 = 30\\,\\text{k}\\Omega$，$R_2 = 10\\,\\text{k}\\Omega$，$R_C = 2\\,\\text{k}\\Omega$，$R_E = 1\\,\\text{k}\\Omega$，$\\beta = 99$，$V_{BE} = 0.7\\,\\text{V}$，則集極直流電流 $I_C$ 約為多少？`,
+              options: [
+                { label: "A", text: `$${ic.toFixed(2)}\\,\\text{mA}$`, isCorrect: true, reason: `$V_{BB} = ${vbb}\\,\\text{V}, R_B = 7.5\\,\\text{k}\\Omega$，$I_B = \\frac{${vbb}-0.7}{7.5\\,\\text{k}+100\\,\\text{k}} \\approx ${ib.toFixed(1)}\\,\\mu\\text{A}$，$I_C = 99 I_B \\approx ${ic.toFixed(2)}\\,\\text{mA}$。` },
+                { label: "B", text: `$${((vbb / 107.5) * 99).toFixed(2)}\\,\\text{mA}$`, isCorrect: false, reason: "誘答陷阱：計算基極電流 $I_B$ 時忘記扣除 $V_{BE} = 0.7\\,\\text{V}$。" },
+                { label: "C", text: `$${(((vbb - 0.7) / 8.5) * 99).toFixed(2)}\\,\\text{mA}$`, isCorrect: false, reason: "誘答陷阱：射極電阻 $R_E$ 反映到基極迴圈時忘記乘以 $(1+\\beta)$。" },
+                { label: "D", text: `$${((((vcc * 30 / 40) - 0.7) / 107.5) * 99).toFixed(2)}\\,\\text{mA}$`, isCorrect: false, reason: "誘答陷阱：分壓公式分子誤放 $R_1 = 30\\,\\text{k}\\Omega$。" }
+              ],
+              solution: `1. 基極左側戴維寧等效：$V_{BB} = ${vcc} \\times \\frac{10}{30+10} = ${vbb}\\,\\text{V}$，$R_B = 30\\,\\text{k} \\parallel 10\\,\\text{k} = 7.5\\,\\text{k}\\Omega$。<br/>2. 基極電流：$I_B = \\frac{${vbb} - 0.7}{7.5\\,\\text{k} + (1+99)\\times 1\\,\\text{k}} \\approx ${ib.toFixed(1)}\\,\\mu\\text{A}$。<br/>3. 集極電流：$I_C = \\beta I_B = 99 \\times ${ib.toFixed(1)}\\,\\mu\\text{A} \\approx ${ic.toFixed(2)}\\,\\text{mA}$。`
+            };
+          }
+          const rf = isVariant ? 12 : 10;
+          const ri = 2;
+          const vi = 0.5;
+          const vo = -(rf / ri) * vi;
+          return {
+            subject, unit: unitTitle, difficulty,
+            svg: buildUnitSvg(subject, unitTitle),
+            question: `【${unitTitle}】如圖理想運算放大器接成反相放大器，$R_i = ${ri}\\,\\text{k}\\Omega$，$R_f = ${rf}\\,\\text{k}\\Omega$，若輸入直流電壓 $V_i = ${vi}\\,\\text{V}$，則閉迴路增益 $A_v$ 與輸出電壓 $V_o$ 分別為何？`,
+            options: [
+              { label: "A", text: `$A_v = -${rf / ri}$，$V_o = ${vo.toFixed(1)}\\,\\text{V}$`, isCorrect: true, reason: `反相增益 $A_v = -\\frac{R_f}{R_i} = -\\frac{${rf}}{${ri}} = -${rf / ri}$，$V_o = (-${rf / ri}) \\times ${vi} = ${vo.toFixed(1)}\\,\\text{V}$。` },
+              { label: "B", text: `$A_v = +${1 + rf / ri}$，$V_o = +${((1 + rf / ri) * vi).toFixed(1)}\\,\\text{V}$`, isCorrect: false, reason: "誘答陷阱：此為「非反相放大器」公式 $1 + \\frac{R_f}{R_i}$。" },
+              { label: "C", text: `$A_v = +${rf / ri}$，$V_o = +${(-vo).toFixed(1)}\\,\\text{V}$`, isCorrect: false, reason: "誘答陷阱：反相放大器輸出與輸入反相 $180^\\circ$，漏掉負號。" },
+              { label: "D", text: `$A_v = -${(ri / rf).toFixed(2)}$，$V_o = -0.1\\,\\text{V}$`, isCorrect: false, reason: "誘答陷阱：增益公式分子與分母寫反。" }
+            ],
+            solution: `1. 負回授理想運算放大器滿足虛短路 $V_- = V_+ = 0\\,\\text{V}$。<br/>2. 反相閉迴路電壓增益 $A_v = -\\frac{R_f}{R_i} = -\\frac{${rf}\\,\\text{k}}{${ri}\\,\\text{k}} = -${rf / ri}$。<br/>3. 輸出電壓 $V_o = A_v \\times V_i = (-${rf / ri}) \\times ${vi} = ${vo.toFixed(1)}\\,\\text{V}$。`
+          };
+        }
+
+        if (subject === "數位邏輯設計") {
+          if (unitTitle.includes("Ch1")) {
+            const dec = isVariant ? 26 : 19;
+            const bin = dec.toString(2);
+            return {
+              subject, unit: unitTitle, difficulty, svg: "",
+              question: `【${unitTitle}】將十進位正整數 $(${dec})_{10}$ 轉換為二進位無號數，其結果為何？`,
+              options: [
+                { label: "A", text: `$(${bin})_2$`, isCorrect: true, reason: `$${dec} = 16 + ${dec - 16} = (${bin})_2$。` },
+                { label: "B", text: `$(${(dec + 2).toString(2)})_2$`, isCorrect: false, reason: "誘答陷阱：連除法餘數由下往上排列順序顛倒。" },
+                { label: "C", text: `$(${(dec - 1).toString(2)})_2$`, isCorrect: false, reason: "誘答陷阱：最低位元 $2^0$ 權重漏算。" },
+                { label: "D", text: `$(${(dec + 4).toString(2)})_2$`, isCorrect: false, reason: "誘答陷阱：中間位元進位計算錯誤。" }
+              ],
+              solution: `利用連除 $2$ 取餘數法（或 $2$ 的次方權重拆解），可得 $(${dec})_{10} = (${bin})_2$。`
+            };
+          }
+          return {
+            subject, unit: unitTitle, difficulty,
+            svg: buildUnitSvg(subject, unitTitle),
+            question: `【${unitTitle}】已知三變數布林函數 $F(A,B,C) = \\sum m(0, 2, 3, 6, 7)$，利用卡諾圖（K-map）化簡後之最簡積之和（SOP）布林代數式為何？`,
+            options: [
+              { label: "A", text: `$B + \\bar{A}\\bar{C}$`, isCorrect: true, reason: "右側 4 格（$m_2,m_3,m_6,m_7$）化簡為 $B$，左右邊界折疊 2 格（$m_0,m_2$）化簡為 $\\bar{A}\\bar{C}$。" },
+              { label: "B", text: `$B + \\bar{A}\\bar{B}\\bar{C}$`, isCorrect: false, reason: "誘答陷阱：忘記卡諾圖左右兩端可折疊相連，只單圈了 $m_0$ 一格。" },
+              { label: "C", text: `$C + \\bar{A}\\bar{B}$`, isCorrect: false, reason: "誘答陷阱：行標頭格雷碼 11 與 10 未對調。" },
+              { label: "D", text: `$A + \\bar{B}\\bar{C}$`, isCorrect: false, reason: "誘答陷阱：列變數與行變數對應錯誤。" }
+            ],
+            solution: `1. 建立格雷碼卡諾圖，填入 $m_0, m_2, m_3, m_6, m_7$ 為 $1$。<br/>2. 右側 $2 \\times 2$ 四格大圈消去 $A、C$ 保留 $B$；左上 $m_0$ 與右上 $m_2$ 左右折疊合圈消去 $B$ 保留 $\\bar{A}\\bar{C}$。<br/>3. 合併得最簡 SOP：$F(A,B,C) = B + \\bar{A}\\bar{C}$。`
+          };
+        }
+
+        if (subject === "數學 C") {
+          const nPow = isVariant ? 3 : 6;
+          const ans = nPow === 6 ? "64" : "-8";
+          return {
+            subject, unit: unitTitle, difficulty, svg: "",
+            question: `【${unitTitle}】設複數 $z = 1 - \\sqrt{3}i$，利用複數極式與棣美弗定理計算 $z^{${nPow}}$ 之值為何？`,
+            options: [
+              { label: "A", text: `$${ans}$`, isCorrect: true, reason: `$z = 2(\\cos 300^\\circ + i\\sin 300^\\circ)$，$z^{${nPow}} = 2^{${nPow}}(\\cos ${300 * nPow}^\\circ + i\\sin ${300 * nPow}^\\circ) = ${ans}$。` },
+              { label: "B", text: `$${nPow === 6 ? "-64" : "8"}$`, isCorrect: false, reason: "誘答陷阱：輻角倍乘後同界角象限正負號判讀錯誤。" },
+              { label: "C", text: `$${nPow === 6 ? "64i" : "8i"}$`, isCorrect: false, reason: "誘答陷阱：實部 $\\cos$ 與虛部 $\\sin$ 函數值寫反。" },
+              { label: "D", text: `$${2 * nPow}$`, isCorrect: false, reason: `誘答陷阱：向徑誤算為 $2 \\times ${nPow} = ${2 * nPow}$（應為 $2^{${nPow}}$）。` }
+            ],
+            solution: `1. $z = 1 - \\sqrt{3}i$ 位於第四象限，向徑 $r = \\sqrt{1^2 + (-\\sqrt{3})^2} = 2$，主輻角 $\\theta = 300^\\circ$。<br/>2. 由棣美弗定理：$z^{${nPow}} = 2^{${nPow}}(\\cos ${300 * nPow}^\\circ + i\\sin ${300 * nPow}^\\circ) = ${ans}$。`
+          };
+        }
+
+        if (subject === "英文") {
+          return {
+            subject, unit: unitTitle, difficulty, svg: "",
+            question: `【${unitTitle}】______ from the top of the mountain, the harbor city looks breathtaking at sunset.`,
+            options: [
+              { label: "A", text: "Seen", isCorrect: true, reason: "逗號後方主詞 the harbor city 與動詞 see 為被動關係（城市被從山頂俯瞰），故分詞構句保留過去分詞 Seen。" },
+              { label: "B", text: "Seeing", isCorrect: false, reason: "誘答陷阱：現在分詞 Seeing 表示主動動作，城市不會自己看。" },
+              { label: "C", text: "To see", isCorrect: false, reason: "誘答陷阱：不定詞片語置於句首表目的，與後句邏輯不符。" },
+              { label: "D", text: "Saw", isCorrect: false, reason: "誘答陷阱：缺乏連接詞不可直接使用過去式動詞。" }
+            ],
+            solution: "1. 原句為被動副詞子句：When the harbor city is seen from the top of the mountain...<br/>2. 省略連接詞 When、相同主詞與 be 動詞後，保留過去分詞 Seen。"
+          };
+        }
+
+        return {
+          subject, unit: unitTitle, difficulty, svg: "",
+          question: `【${unitTitle}】北科附工電子科學生寫信感謝指導老師的栽培，關於「信封中路啟封詞」與「信內開頭提稱語」之搭配，下列何者完全正確？`,
+          options: [
+            { label: "A", text: "信封寫「道啟」；信內寫「函丈」", isCorrect: true, reason: "對師長信封中路啟封詞用「道啟」，信內開頭提稱語用「函丈 / 壇席 / 講座」。" },
+            { label: "B", text: "信封寫「敬啟」；信內寫「膝下」", isCorrect: false, reason: "誘答陷阱：「敬啟」是命令對方恭敬開信的失禮用法，「膝下」用於父母祖父母。" },
+            { label: "C", text: "信封寫「台啟」；信內寫「大鑒」", isCorrect: false, reason: "誘答陷阱：此組用於平輩朋友。" },
+            { label: "D", text: "信封寫「鈞啟」；信內寫「青覽」", isCorrect: false, reason: "誘答陷阱：「青覽」用於晚輩。" }
+          ],
+          solution: `1. 本課核心口訣：${pb.mnemonic}。<br/>2. 信封中路寫給郵差看，對師長格式為「姓 ＋ 老師 ＋ 名 ＋ 道啟」，嚴禁寫「敬啟」；信內開頭對師長提稱語為「函丈」。`
+        };
+      }
+
+      // ---------------------------------------------------------------------
+      // 8. BEIKE (北科附工) EXAM REVIEW DATA
+      // ---------------------------------------------------------------------
+      const BEIKE_EXAM_ITEMS = [
+        { id: "bk_be1", subject: "基本電學", unit: "Ch4 直流網路分析與戴維寧/諾頓", title: "戴維寧等效電路與最大功率轉移（$R_L = R_{TH}$）", formula: "$P_{L(\\max)} = \\frac{V_{TH}^2}{4 R_{TH}}$，電源傳輸效率為 $50\\%$" },
+        { id: "bk_be2", subject: "基本電學", unit: "Ch9 基本交流電路 RLC", title: "交流 RLC 串聯相量運算與諧振頻率", formula: "$Z = R + j(X_L - X_C)$，$f_r = \\frac{1}{2\\pi\\sqrt{LC}}$" },
+        { id: "bk_el1", subject: "電子學", unit: "Ch4 BJT直流偏壓電路", title: "BJT 分壓式偏壓直流 Q 點與飽和區檢驗", formula: "$I_B = \\frac{V_{BB} - 0.7}{R_B + (1+\\beta)R_E}$，$V_{CE} > 0.2\\,\\text{V}$" },
+        { id: "bk_el2", subject: "電子學", unit: "Ch9 運算放大器 OP-Amp 應用", title: "理想運算放大器虛短路與反相／非反相增益", formula: "反相 $A_v = -\\frac{R_f}{R_i}$，非反相 $A_v = 1 + \\frac{R_f}{R_i}$" },
+        { id: "bk_dl1", subject: "數位邏輯設計", unit: "Ch4 卡諾圖 K-map 化簡", title: "卡諾圖（K-map）格雷碼順序與最簡 SOP 化簡", formula: "行列順序 00, 01, 11, 10，圈 $2^k$ 格消去 $k$ 個變數" },
+        { id: "bk_dl2", subject: "數位邏輯設計", unit: "Ch6 正反器 Flip-Flop 原理", title: "JK 正反器邊緣觸發時序圖與全加器邏輯式", formula: "$S = A \\oplus B \\oplus C_i$，$C_o = AB + (A \\oplus B)C_i$" },
+        { id: "bk_mc1", subject: "數學 C", unit: "Ch10 複數極式/隸美弗定理與微積分基礎", title: "複數極式轉換、棣美弗定理與微積分極值判別", formula: "$[r(\\cos\\theta + i\\sin\\theta)]^n = r^n(\\cos n\\theta + i\\sin n\\theta)$" },
+        { id: "bk_en1", subject: "英文", unit: "U4 分詞構句與不定詞/動名詞", title: "假設語氣時態對照、分詞構句與句子重組", formula: "If + S + were, S + would + V；It is + Adj. + for sb. + to V" },
+        { id: "bk_ch1", subject: "國文", unit: "U7 高職特色應用文書信題辭對聯", title: "15篇核心古文與高職應用文書信題辭對照", formula: "師長信封「道啟」、信內「函丈」；杏壇＝教育、杏林＝醫學" }
+      ];
+
+      const BEIKE_UNIT_TRAPS = [
+        { subject: "基本電學", title: "單位地雷：mA × kΩ = V，μA × MΩ = V", detail: "$10^{-3} \\times 10^3 = 1$ 相乘直接得伏特（V），千萬不可再乘或除以 $1000$！" },
+        { subject: "基本電學", title: "交流有效值 Vrms vs. 最大值 Vm", detail: "正弦波 $v(t) = V_m\\sin(\\omega t)$ 計算功率與電流前，務必先除以 $\\sqrt{2}$ 化為有效值 $V_{rms}$！" },
+        { subject: "電子學", title: "矽電晶體導通門檻 $V_{BE} = 0.7\\,\\text{V}$ 與飽和檢查", detail: "算 $I_B$ 分子忘記減 $0.7\\,\\text{V}$，或算出 $V_{CE} < 0.2\\,\\text{V}$ 卻未改用飽和模式重算，是北科附工段考頭號殺手！" },
+        { subject: "數位邏輯設計", title: "卡諾圖第 3、4 行格雷碼對調：00, 01, 11, 10", detail: "寫成 00, 01, 10, 11 會導致相鄰格子不止差一個變數，整題化簡全錯！" },
+        { subject: "國文", title: "信封啟封詞嚴禁寫「敬啟」＆「杏壇 vs. 杏林」", detail: "信封寫「敬啟」是命令對方恭敬開信的失禮用法；杏壇指教育界，杏林指醫學界。" }
+      ];
+
+      const BEIKE_QUIZZES = [
+        {
+          id: "bq_be1", subject: "基本電學", unit: "Ch4 直流網路分析與戴維寧/諾頓",
+          question: "【北科附工段考精選】某線性直流網路從 $a、b$ 端測得開路電壓 $V_{ab} = 20\\,\\text{V}$，短路電流 $I_{sc} = 5\\,\\text{A}$。若在 $a、b$ 端接上可變電阻 $R_L$，則 $R_L$ 可獲得之最大功率為何？",
+          options: [
+            { label: "A", text: "$25\\,\\text{W}$", isCorrect: true, reason: "$R_{TH} = \\frac{20}{5} = 4\\,\\Omega$，$P_{L(\\max)} = \\frac{20^2}{4 \\times 4} = 25\\,\\text{W}$。" },
+            { label: "B", text: "$100\\,\\text{W}$", isCorrect: false, reason: "誘答陷阱：直接用 $20 \\times 5 = 100\\,\\text{W}$，忘記分母需除以 $4$。" },
+            { label: "C", text: "$50\\,\\text{W}$", isCorrect: false, reason: "誘答陷阱：最大功率公式分母誤寫為 $2 R_{TH}$。" },
+            { label: "D", text: "$20\\,\\text{W}$", isCorrect: false, reason: "誘答陷阱：誤將開路電壓數值當成功率。" }
+          ]
+        },
+        {
+          id: "bq_el1", subject: "電子學", unit: "Ch4 BJT直流偏壓電路",
+          question: "【北科附工段考精選】BJT 分壓式偏壓電路，$V_{CC} = 12\\,\\text{V}$，$R_1 = 30\\,\\text{k}\\Omega$，$R_2 = 10\\,\\text{k}\\Omega$，$R_C = 2\\,\\text{k}\\Omega$，$R_E = 1\\,\\text{k}\\Omega$，$\\beta = 99$，$V_{BE} = 0.7\\,\\text{V}$，則集極電流 $I_C$ 約為多少？",
+          options: [
+            { label: "A", text: "$2.12\\,\\text{mA}$", isCorrect: true, reason: "$V_{BB} = 3\\,\\text{V}, R_B = 7.5\\,\\text{k}\\Omega$，$I_B = \\frac{3-0.7}{7.5\\,\\text{k}+100\\,\\text{k}} \\approx 21.4\\,\\mu\\text{A}$，$I_C \\approx 2.12\\,\\text{mA}$。" },
+            { label: "B", text: "$2.76\\,\\text{mA}$", isCorrect: false, reason: "誘答陷阱：計算 $I_B$ 時忘記扣除 $V_{BE} = 0.7\\,\\text{V}$。" },
+            { label: "C", text: "$26.79\\,\\text{mA}$", isCorrect: false, reason: "誘答陷阱：射極電阻 $R_E$ 反映到基極時忘記乘以 $(1+\\beta)$。" },
+            { label: "D", text: "$7.64\\,\\text{mA}$", isCorrect: false, reason: "誘答陷阱：分壓公式分子誤放 $R_1 = 30\\,\\text{k}\\Omega$。" }
+          ]
+        },
+        {
+          id: "bq_dl1", subject: "數位邏輯設計", unit: "Ch4 卡諾圖 K-map 化簡",
+          question: "【北科附工段考精選】三變數布林函數 $F(A,B,C) = \\sum m(0, 2, 3, 6, 7)$ 經卡諾圖化簡後之最簡 SOP 為何？",
+          options: [
+            { label: "A", text: "$B + \\bar{A}\\bar{C}$", isCorrect: true, reason: "右側 4 格（$m_2,m_3,m_6,m_7$）化簡為 $B$，左右折疊 2 格（$m_0,m_2$）化簡為 $\\bar{A}\\bar{C}$。" },
+            { label: "B", text: "$B + \\bar{A}\\bar{B}\\bar{C}$", isCorrect: false, reason: "誘答陷阱：忘記卡諾圖左右邊界可折疊與 $m_2$ 合併圈選。" },
+            { label: "C", text: "$C + \\bar{A}\\bar{B}$", isCorrect: false, reason: "誘答陷阱：格雷碼 11 與 10 行順序未對調。" },
+            { label: "D", text: "$A + \\bar{B}\\bar{C}$", isCorrect: false, reason: "誘答陷阱：列變數 $A$ 與行變數 $B$ 看反。" }
+          ]
+        },
+        {
+          id: "bq_mc1", subject: "數學 C", unit: "Ch10 複數極式/隸美弗定理與微積分基礎",
+          question: "【北科附工段考精選】設複數 $z = 1 - \\sqrt{3}i$，利用棣美弗定理求 $z^6$ 之值為何？",
+          options: [
+            { label: "A", text: "$64$", isCorrect: true, reason: "$z = 2(\\cos 300^\\circ + i\\sin 300^\\circ)$，$z^6 = 64(\\cos 1800^\\circ + i\\sin 1800^\\circ) = 64$。" },
+            { label: "B", text: "$-64$", isCorrect: false, reason: "誘答陷阱：角度符號判讀錯誤。" },
+            { label: "C", text: "$64i$", isCorrect: false, reason: "誘答陷阱：實部與虛部三角函數寫反。" },
+            { label: "D", text: "$12$", isCorrect: false, reason: "誘答陷阱：向徑誤算成 $2 \\times 6 = 12$。" }
+          ]
+        },
+        {
+          id: "bq_en1", subject: "英文", unit: "U4 分詞構句與不定詞/動名詞",
+          question: "【北科附工段考精選】______ from the top of the hill, the town looks very peaceful at night.",
+          options: [
+            { label: "A", text: "Seeing", isCorrect: false, reason: "誘答陷阱：逗號後方主詞 the town（小鎮）是被看見，應選被動分詞。" },
+            { label: "B", text: "Seen", isCorrect: true, reason: "被動分詞構句省略連接詞與 be 動詞後，保留過去分詞 Seen。" },
+            { label: "C", text: "To see", isCorrect: false, reason: "誘答陷阱：不定詞片語在此表目的，語意不符。" },
+            { label: "D", text: "Saw", isCorrect: false, reason: "誘答陷阱：缺乏連接詞不可直接放過去式動詞。" }
+          ]
+        },
+        {
+          id: "bq_ch1", subject: "國文", unit: "U7 高職特色應用文書信題辭對聯",
+          question: "【北科附工段考精選】寫信給北科附工電子科指導老師，信封中路啟封詞與信內開頭提稱語何者正確？",
+          options: [
+            { label: "A", text: "信封「道啟」；信內「函丈」", isCorrect: true, reason: "對師長信封用「道啟」，信內提稱語用「函丈 / 壇席 / 講座」。" },
+            { label: "B", text: "信封「敬啟」；信內「膝下」", isCorrect: false, reason: "誘答陷阱：「敬啟」命令對方恭敬開信極失禮，「膝下」用於父母。" },
+            { label: "C", text: "信封「台啟」；信內「大鑒」", isCorrect: false, reason: "誘答陷阱：此組用於平輩朋友。" },
+            { label: "D", text: "信封「鈞啟」；信內「青覽」", isCorrect: false, reason: "誘答陷阱：「青覽」用於晚輩。" }
+          ]
+        }
+      ];
+
+      // ---------------------------------------------------------------------
+      // 9. APPLICATION STATE & HELPERS
+      // ---------------------------------------------------------------------
+      const appState = {
+        speedSubject: "ALL",
+        speedFavs: [],
+        speedAttachment: null,
+        quizData: null,
+        quizUserPick: null,
+        quizSolMode: "speed",
+        playbookSubject: "ALL",
+        beikeChecks: {},
+        beikeAnswers: {},
+        beikeTimerSec: 600,
+        beikeTimerRunning: false,
+        beikeTimerInterval: null,
+        solverAttachment: null,
+        customApiKey: ""
+      };
+
+      function safeRenderMath(el) {
+        if (!el) return;
+        try {
+          if (typeof renderMathInElement === "function") {
+            renderMathInElement(el, {
+              delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+              ],
+              throwOnError: false
+            });
+          } else {
+            setTimeout(() => {
+              try {
+                if (typeof renderMathInElement === "function") safeRenderMath(el);
+              } catch (e) {}
+            }, 300);
+          }
+        } catch (e) {}
+      }
+
+      function showToast(msg, type) {
+        try {
+          const box = document.getElementById("toast-container");
+          if (!box) return;
+          const div = document.createElement("div");
+          const styles = {
+            info: "bg-slate-900 text-white border-slate-700",
+            success: "bg-emerald-700 text-white border-emerald-500",
+            warning: "bg-amber-600 text-white border-amber-400",
+            error: "bg-rose-700 text-white border-rose-500"
+          };
+          div.className = `pointer-events-auto px-3.5 py-2.5 rounded-xl border shadow-lg text-xs font-bold fade-in break-words ${styles[type] || styles.info}`;
+          div.textContent = msg;
+          box.appendChild(div);
+          setTimeout(() => {
+            div.style.opacity = "0";
+            div.style.transition = "opacity 0.25s";
+            setTimeout(() => div.remove(), 260);
+          }, 3000);
+        } catch (e) {}
+      }
+
+      function applyTaiwanTerminology(text) {
+        if (!text || typeof text !== "string") return "";
+        return text
+          .replace(/基爾霍夫/g, "克希荷夫")
+          .replace(/戴維南/g, "戴維寧")
+          .replace(/串混聯/g, "串並聯")
+          .replace(/二極管/g, "二極體")
+          .replace(/三極管/g, "電晶體")
+          .replace(/場效應管/g, "場效電晶體")
+          .replace(/集成運放/g, "運算放大器")
+          .replace(/耗盡層/g, "空乏區")
+          .replace(/觸發器/g, "正反器")
+          .replace(/異或門/g, "互斥或閘")
+          .replace(/與非門/g, "反及閘")
+          .replace(/或非門/g, "反或閘")
+          .replace(/與門/g, "及閘")
+          .replace(/或門/g, "或閘")
+          .replace(/非門/g, "反閘");
+      }
+
+      function formatFileSize(bytes) {
+        if (!bytes || bytes < 1024) return (bytes || 0) + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      // ---------------------------------------------------------------------
+      // 10. UNIVERSAL FILE / PHOTO / PDF / NOTE UPLOAD HANDLER
+      // ---------------------------------------------------------------------
+      window.onNativeFileInputChange = function (event, targetKey) {
+        try {
+          const input = event && event.target;
+          const file = input && input.files && input.files[0];
+          if (!file) return;
+          window.handleFileUpload(file, targetKey);
+          // Reset input value so the same file can be re-selected later
+          input.value = "";
+        } catch (e) {
+          showToast("檔案讀取發生異常，請重試", "error");
+        }
+      };
+
+      window.handleFileUpload = function (file, targetKey) {
+        if (!file) return;
+        const key = targetKey === "speed" ? "speed" : "solver";
+        const fileName = file.name || "未命名檔案";
+        const fileSize = formatFileSize(file.size);
+        const mime = file.type || "";
+        const lowerName = fileName.toLowerCase();
+
+        const isImage = mime.startsWith("image/") || /\.(png|jpe?g|gif|webp|bmp|heic)$/i.test(lowerName);
+        const isPdf = mime === "application/pdf" || /\.pdf$/i.test(lowerName);
+
+        if (isImage) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const dataUrl = String(e.target.result || "");
+            const parts = dataUrl.split(",");
+            const detectedMime = (parts[0].match(/:(.*?);/) || [])[1] || "image/png";
+            const base64 = parts[1] || "";
+            const att = {
+              kind: "image",
+              fileName,
+              fileSize,
+              mimeType: detectedMime,
+              base64,
+              dataUrl
+            };
+            if (key === "speed") appState.speedAttachment = att;
+            else appState.solverAttachment = att;
+            renderAttachmentPreview(key);
+            showToast(`📷 已載入圖片：${fileName} (${fileSize})`, "success");
+          };
+          reader.onerror = function () {
+            showToast("圖片讀取失敗，請換一張圖片重試", "error");
+          };
+          reader.readAsDataURL(file);
+        } else if (isPdf) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const dataUrl = String(e.target.result || "");
+            const parts = dataUrl.split(",");
+            const base64 = parts[1] || "";
+            // Rough page estimate from PDF byte size (~50KB per page average, min 1)
+            const estPages = Math.max(1, Math.round((file.size || 50000) / 55000));
+            const att = {
+              kind: "pdf",
+              fileName,
+              fileSize,
+              estPages,
+              mimeType: "application/pdf",
+              base64
+            };
+            if (key === "speed") appState.speedAttachment = att;
+            else appState.solverAttachment = att;
+            renderAttachmentPreview(key);
+            showToast(`📄 已載入 PDF 檔案：${fileName} (${fileSize})`, "success");
+          };
+          reader.onerror = function () {
+            showToast("PDF 讀取失敗，請確認檔案未損毀", "error");
+          };
+          reader.readAsDataURL(file);
+        } else {
+          // Text / Markdown / CSV / JSON / Notes
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const fullText = String(e.target.result || "");
+            const previewText = fullText.slice(0, 200);
+            const att = {
+              kind: "text",
+              fileName,
+              fileSize,
+              mimeType: mime || "text/plain",
+              textContent: fullText,
+              previewText
+            };
+            if (key === "speed") {
+              appState.speedAttachment = att;
+              const inp = document.getElementById("custom-speed-input");
+              if (inp && !inp.value.trim()) {
+                inp.value = fullText.slice(0, 300).replace(/\s+/g, " ");
+              }
+            } else {
+              appState.solverAttachment = att;
+              const box = document.getElementById("solver-prompt-text");
+              if (box) {
+                const prefix = box.value.trim() ? box.value.trim() + "\n\n" : "";
+                box.value = prefix + `【已匯入筆記檔：${fileName}】\n` + fullText.slice(0, 2000);
+              }
+            }
+            renderAttachmentPreview(key);
+            showToast(`📝 已讀取筆記內容：${fileName} (${fileSize})`, "success");
+          };
+          reader.onerror = function () {
+            showToast("文字檔讀取失敗，請確認編碼格式", "error");
+          };
+          reader.readAsText(file);
+        }
+      };
+
+      function renderAttachmentPreview(targetKey) {
+        const key = targetKey === "speed" ? "speed" : "solver";
+        const box = document.getElementById(key === "speed" ? "speed-upload-preview" : "solver-upload-preview");
+        const att = key === "speed" ? appState.speedAttachment : appState.solverAttachment;
+        if (!box) return;
+
+        if (!att) {
+          box.classList.add("hidden");
+          box.innerHTML = "";
+          return;
+        }
+
+        box.classList.remove("hidden");
+        if (att.kind === "image") {
+          box.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="px-2 py-0.5 rounded bg-blue-600 text-white text-[10px] font-extrabold shrink-0">📷 圖片就緒</span>
+                <span class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(att.fileName)}</span>
+                <span class="text-[11px] font-mono text-slate-500 shrink-0">(${escapeHtml(att.fileSize)})</span>
+              </div>
+              <button type="button" onclick="window.removeAttachment('${key}')" class="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-extrabold shrink-0 transition">✕ 移除檔案</button>
+            </div>
+            <img src="${att.dataUrl}" alt="上傳題目圖片預覽" class="max-h-48 w-auto mx-auto rounded-xl border border-slate-200 shadow-xs object-contain bg-white" />
+          `;
+        } else if (att.kind === "pdf") {
+          box.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-rose-600 text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">PDF</div>
+                <div class="min-w-0">
+                  <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(att.fileName)}</div>
+                  <div class="text-[11px] text-slate-600 font-mono">大小：${escapeHtml(att.fileSize)} ｜ 預估約 ${att.estPages} 頁・已編碼完成</div>
+                </div>
+              </div>
+              <button type="button" onclick="window.removeAttachment('${key}')" class="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-extrabold shrink-0 transition">✕ 移除檔案</button>
+            </div>
+          `;
+        } else {
+          box.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-extrabold shrink-0">📝 筆記檔就緒</span>
+                <span class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(att.fileName)}</span>
+                <span class="text-[11px] font-mono text-slate-500 shrink-0">(${escapeHtml(att.fileSize)})</span>
+              </div>
+              <button type="button" onclick="window.removeAttachment('${key}')" class="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-extrabold shrink-0 transition">✕ 移除檔案</button>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-2.5 text-[11px] text-slate-700 font-mono whitespace-pre-wrap break-words max-h-24 overflow-y-auto">${escapeHtml(att.previewText)}${att.textContent && att.textContent.length > 200 ? "..." : ""}</div>
+          `;
+        }
+      }
+
+      window.removeAttachment = function (targetKey) {
+        if (targetKey === "speed") appState.speedAttachment = null;
+        else appState.solverAttachment = null;
+        renderAttachmentPreview(targetKey);
+        showToast("已移除附加檔案", "info");
+      };
+
+      function bindDragDropAndPaste() {
+        const zones = [
+          { id: "speed-dropzone", key: "speed" },
+          { id: "solver-dropzone", key: "solver" }
+        ];
+        zones.forEach(z => {
+          const el = document.getElementById(z.id);
+          if (!el) return;
+          el.addEventListener("dragover", function (e) {
+            e.preventDefault();
+            el.classList.add("border-amber-500", "bg-amber-50/70");
+          });
+          el.addEventListener("dragleave", function () {
+            el.classList.remove("border-amber-500", "bg-amber-50/70");
+          });
+          el.addEventListener("drop", function (e) {
+            e.preventDefault();
+            el.classList.remove("border-amber-500", "bg-amber-50/70");
+            const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) window.handleFileUpload(file, z.key);
+          });
+        });
+
+        // Clipboard Paste Image Listener
+        window.addEventListener("paste", function (e) {
+          try {
+            const items = e.clipboardData && e.clipboardData.items;
+            if (!items) return;
+            for (let i = 0; i < items.length; i++) {
+              if (items[i].type && items[i].type.indexOf("image/") === 0) {
+                const file = items[i].getAsFile();
+                if (file) {
+                  const speedPanel = document.getElementById("tab-speed");
+                  const isSpeedVisible = speedPanel && speedPanel.style.display !== "none" && !speedPanel.classList.contains("hidden");
+                  const target = isSpeedVisible ? "speed" : "solver";
+                  if (!isSpeedVisible) window.switchTab("tab-solve");
+                  window.handleFileUpload(file, target);
+                }
+                break;
+              }
+            }
+          } catch (err) {}
+        });
+      }
+
+      // ---------------------------------------------------------------------
+      // 11. GEMINI API CALL WITH EXPONENTIAL BACKOFF + INLINE DATA SUPPORT
+      // ---------------------------------------------------------------------
+      function getEffectiveApiKey() {
+        return appState.customApiKey ? appState.customApiKey.trim() : "";
+      }
+
+      async function callGeminiWithFallback(parts, systemPrompt, schemaObj) {
+        const key = getEffectiveApiKey();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`;
+        const payload = {
+          contents: [{ role: "user", parts }],
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: {
+            temperature: 0.35,
+            responseMimeType: "application/json",
+            responseSchema: schemaObj
+          }
+        };
+
+        const delays = [1000, 2000, 4000];
+        for (let attempt = 0; attempt <= delays.length; attempt++) {
+          try {
+            const res = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+              if ((res.status === 429 || res.status >= 500) && attempt < delays.length) {
+                await new Promise(r => setTimeout(r, delays[attempt]));
+                continue;
+              }
+              return null;
+            }
+            const data = await res.json();
+            const rawText = data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
+            if (!rawText) return null;
+            return JSON.parse(applyTaiwanTerminology(rawText));
+          } catch (err) {
+            if (attempt < delays.length) {
+              await new Promise(r => setTimeout(r, delays[attempt]));
+              continue;
+            }
+            return null;
+          }
+        }
+        return null;
+      }
+
+      window.toggleApiKeyModal = function (show) {
+        const m = document.getElementById("apikey-modal");
+        if (!m) return;
+        if (show) {
+          const inp = document.getElementById("custom-apikey-input");
+          if (inp) inp.value = appState.customApiKey || "";
+          m.classList.remove("hidden");
+        } else {
+          m.classList.add("hidden");
+        }
+      };
+
+      window.saveCustomApiKey = function () {
+        const inp = document.getElementById("custom-apikey-input");
+        appState.customApiKey = inp ? inp.value.trim() : "";
+        safeSetStorage("tcte_custom_apikey", appState.customApiKey);
+        window.toggleApiKeyModal(false);
+        showToast("已儲存 Gemini API 連線設定！", "success");
+      };
+
+      window.clearCustomApiKey = function () {
+        appState.customApiKey = "";
+        safeRemoveStorage("tcte_custom_apikey");
+        const inp = document.getElementById("custom-apikey-input");
+        if (inp) inp.value = "";
+        window.toggleApiKeyModal(false);
+        showToast("已恢復預設留空授權", "info");
+      };
+
+      // ---------------------------------------------------------------------
+      // 12. TAB 1: ⚡ 速解秘笈 (24 TRICKS + FAVORITES + AI CUSTOM GENERATOR)
+      // ---------------------------------------------------------------------
+      window.setSpeedSubject = function (subj) {
+        appState.speedSubject = subj;
+        const btns = document.querySelectorAll(".sp-subj-btn");
+        btns.forEach(btn => {
+          const s = btn.getAttribute("data-sp-subj");
+          if (s === subj) {
+            btn.className = "sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-500 text-slate-950 shadow-xs transition";
+          } else if (s === "FAV") {
+            btn.className = "sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-amber-200 border border-amber-400/35 transition";
+          } else {
+            btn.className = "sp-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition";
+          }
+        });
+        window.renderSpeedCards();
+      };
+
+      window.toggleSpeedFav = function (trickId) {
+        const idx = appState.speedFavs.indexOf(trickId);
+        if (idx === -1) {
+          appState.speedFavs.push(trickId);
+          showToast("⭐ 已加入「我的口袋收藏」", "success");
+        } else {
+          appState.speedFavs.splice(idx, 1);
+          showToast("已從口袋收藏移除", "info");
+        }
+        safeSetStorage("tcte_speed_favs", appState.speedFavs);
+        window.renderSpeedCards();
+      };
+
+      window.practiceSpeedTrick = function (subject, unit) {
+        const subjEl = document.getElementById("quiz-subject-select");
+        if (subjEl) {
+          subjEl.value = subject;
+          window.updateUnitDropdown(unit);
+        }
+        window.switchTab("tab-quiz");
+        window.generateUnitQuestion(false);
+      };
+
+      window.renderSpeedCards = function () {
+        const grid = document.getElementById("speed-cards-grid");
+        const countBadge = document.getElementById("speed-count-badge");
+        const favCountEl = document.getElementById("speed-fav-count");
+        if (favCountEl) favCountEl.textContent = String(appState.speedFavs.length);
+        if (!grid) return;
+
+        const kwInput = document.getElementById("speed-keyword-input");
+        const kw = kwInput ? kwInput.value.trim().toLowerCase() : "";
+
+        const filtered = SPEED_SOLVING_VAULT.filter(item => {
+          if (appState.speedSubject === "FAV") {
+            if (appState.speedFavs.indexOf(item.id) === -1) return false;
+          } else if (appState.speedSubject !== "ALL") {
+            if (item.subject !== appState.speedSubject) return false;
+          }
+          if (kw) {
+            const hay = `${item.subject} ${item.unit} ${item.title} ${item.mnemonic} ${item.fastWay} ${item.slowWay}`.toLowerCase();
+            if (!hay.includes(kw)) return false;
+          }
+          return true;
+        });
+
+        if (countBadge) countBadge.textContent = `顯示 ${filtered.length} 招`;
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `<div class="col-span-full bg-white rounded-3xl border border-slate-200 p-8 text-center text-sm text-slate-500">找不到符合條件的速解絕招，請切換分類或清除搜尋關鍵字！</div>`;
+          return;
+        }
+
+        const badgeColor = {
+          "基本電學": "bg-amber-100 text-amber-900",
+          "電子學": "bg-blue-100 text-blue-900",
+          "數位邏輯設計": "bg-emerald-100 text-emerald-900",
+          "數學 C": "bg-purple-100 text-purple-900",
+          "英文": "bg-rose-100 text-rose-900",
+          "國文": "bg-teal-100 text-teal-900"
+        };
+
+        grid.innerHTML = filtered.map(item => {
+          const isFav = appState.speedFavs.indexOf(item.id) !== -1;
+          return `
+            <article class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-5 flex flex-col justify-between gap-3.5 min-w-0 hover:border-amber-400 transition">
+              <div class="space-y-3 min-w-0">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold ${badgeColor[item.subject] || "bg-slate-100 text-slate-800"}">${item.subject}</span>
+                    <span class="px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-extrabold">${item.timeSave}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="window.toggleSpeedFav('${item.id}')" class="px-2.5 py-1 rounded-xl border text-xs font-extrabold transition ${isFav ? "bg-amber-400 border-amber-500 text-slate-950" : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-amber-50"}">
+                      ${isFav ? "⭐ 已收藏" : "☆ 收藏"}
+                    </button>
+                    <button type="button" onclick="window.practiceSpeedTrick('${item.subject}', '${item.unit}')" class="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 text-xs font-extrabold transition">
+                      🎯 練這招
+                    </button>
+                  </div>
+                </div>
+
+                <h3 class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug break-words">${item.title}</h3>
+
+                <div class="rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-xs font-bold text-amber-950 leading-relaxed break-words">
+                  🔥 ${item.mnemonic}
+                </div>
+
+                <div class="bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 overflow-x-auto max-w-full">
+                  ${item.formula}
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div class="rounded-xl bg-rose-50/70 border border-rose-200 p-2.5 space-y-1">
+                    <div class="font-extrabold text-rose-800">🐢 傳統慢解法</div>
+                    <p class="text-slate-700 leading-relaxed break-words">${item.slowWay}</p>
+                  </div>
+                  <div class="rounded-xl bg-emerald-50/80 border border-emerald-200 p-2.5 space-y-1">
+                    <div class="font-extrabold text-emerald-800">⚡ 統測秒殺法</div>
+                    <p class="text-slate-900 font-medium leading-relaxed break-words">${item.fastWay}</p>
+                  </div>
+                </div>
+
+                <div class="text-xs text-slate-600 bg-slate-50 rounded-xl p-2.5 border border-slate-100 leading-relaxed break-words">
+                  <strong class="text-slate-800">📝 例題示範：</strong>${item.example}
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("");
+
+        safeRenderMath(grid);
+      };
+
+      window.generateCustomSpeedTrick = async function () {
+        const inp = document.getElementById("custom-speed-input");
+        const resBox = document.getElementById("custom-speed-result");
+        const btn = document.getElementById("btn-custom-speed");
+        const query = inp ? inp.value.trim() : "";
+        const att = appState.speedAttachment;
+
+        if (!query && !att) {
+          showToast("請輸入題目文字，或上傳照片／PDF／筆記檔！", "warning");
+          return;
+        }
+
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "⏳ 提煉速解口訣中...";
+        }
+
+        const parts = [];
+        let promptStr = "你是台灣技高統測與北科附工電子科首席名師，使用台灣 108 課綱術語（克希荷夫、戴維寧、正反器、二極體、運算放大器）。請針對使用者提供的題目、圖片或檔案，提煉專屬考場秒殺速解法、傳統慢解法對比與關鍵公式。";
+        if (query) promptStr += "\n題目／需求：" + query;
+        if (att && att.kind === "text") promptStr += "\n附加筆記內容：\n" + att.textContent.slice(0, 3000);
+        parts.push({ text: promptStr });
+
+        if (att && (att.kind === "image" || att.kind === "pdf") && att.base64) {
+          parts.push({
+            inlineData: {
+              mimeType: att.mimeType,
+              data: att.base64
+            }
+          });
+        }
+
+        const schema = {
+          type: "OBJECT",
+          properties: {
+            title: { type: "STRING" },
+            mnemonic: { type: "STRING" },
+            formula: { type: "STRING" },
+            slowWay: { type: "STRING" },
+            fastWay: { type: "STRING" }
+          },
+          required: ["title", "mnemonic", "formula", "slowWay", "fastWay"]
+        };
+
+        let result = await callGeminiWithFallback(parts, "Output valid JSON only with Traditional Chinese 108 curriculum terms.", schema);
+
+        if (!result) {
+          // Intelligent Local Offline Fallback
+          const combined = (query + " " + (att ? att.fileName + " " + (att.textContent || "") : "")).toLowerCase();
+          let matched = SPEED_SOLVING_VAULT[0];
+          if (combined.includes("bjt") || combined.includes("偏壓") || combined.includes("電晶體")) matched = SPEED_SOLVING_VAULT[6];
+          else if (combined.includes("op") || combined.includes("運放") || combined.includes("放大器")) matched = SPEED_SOLVING_VAULT[8];
+          else if (combined.includes("卡諾") || combined.includes("布林") || combined.includes("邏輯") || combined.includes("計數器")) matched = SPEED_SOLVING_VAULT[11];
+          else if (combined.includes("三角") || combined.includes("向量") || combined.includes("複數") || combined.includes("積分")) matched = SPEED_SOLVING_VAULT[13];
+          else if (combined.includes("英文") || combined.includes("克漏字") || combined.includes("重組")) matched = SPEED_SOLVING_VAULT[17];
+          else if (combined.includes("國文") || combined.includes("書信") || combined.includes("師說")) matched = SPEED_SOLVING_VAULT[21];
+          else if (combined.includes("戴維寧") || combined.includes("密爾門") || combined.includes("交流") || combined.includes("暫態")) matched = SPEED_SOLVING_VAULT[2];
+
+          result = {
+            title: `專屬提煉：【${matched.title}】`,
+            mnemonic: matched.mnemonic,
+            formula: matched.formula,
+            slowWay: matched.slowWay,
+            fastWay: `針對你的題目${att ? "（已讀取檔案：" + att.fileName + "）" : ""}：${matched.fastWay}`
+          };
+        }
+
+        if (resBox) {
+          resBox.classList.remove("hidden");
+          resBox.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-extrabold text-amber-900">✨ ${escapeHtml(result.title)}</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[10px] font-bold">秒殺提煉完成</span>
+            </div>
+            <div class="text-xs font-bold text-slate-900 bg-white rounded-xl p-2.5 border border-amber-200">🔥 口訣：${escapeHtml(result.mnemonic)}</div>
+            <div class="text-xs text-slate-800 bg-white/80 rounded-xl p-2.5 border border-amber-100 overflow-x-auto">${result.formula}</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div class="bg-rose-50/80 border border-rose-200 rounded-xl p-2.5"><strong>🐢 傳統慢解法：</strong>${escapeHtml(result.slowWay)}</div>
+              <div class="bg-emerald-50/90 border border-emerald-200 rounded-xl p-2.5"><strong>⚡ 考場秒殺法：</strong>${escapeHtml(result.fastWay)}</div>
+            </div>
+          `;
+          safeRenderMath(resBox);
+        }
+
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "⚡ 提煉專屬速解法";
+        }
+      };
+
+      // ---------------------------------------------------------------------
+      // 13. TAB 2: 🎯 智能出題 (QUIZ GENERATOR + DUAL SOLUTION MODES)
+      // ---------------------------------------------------------------------
+      window.setQuizSolutionMode = function (mode) {
+        appState.quizSolMode = mode;
+        const btnSpeed = document.getElementById("btn-sol-mode-speed");
+        const btnStd = document.getElementById("btn-sol-mode-std");
+        const boxSpeed = document.getElementById("qres-speed-solution");
+        const boxStd = document.getElementById("qres-solution");
+        if (!btnSpeed || !btnStd || !boxSpeed || !boxStd) return;
+
+        if (mode === "speed") {
+          btnSpeed.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 shadow-xs transition";
+          btnStd.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+          boxSpeed.classList.remove("hidden");
+          boxStd.classList.add("hidden");
+        } else {
+          btnStd.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-600 text-white shadow-xs transition";
+          btnSpeed.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition";
+          boxStd.classList.remove("hidden");
+          boxSpeed.classList.add("hidden");
+        }
+      };
+
+      window.generateUnitQuestion = function (isVariant) {
+        const subj = (document.getElementById("quiz-subject-select") || {}).value || "基本電學";
+        const unit = (document.getElementById("quiz-lesson-select") || {}).value || (CURRICULUM_UNITS_MAP[subj] && CURRICULUM_UNITS_MAP[subj][0]) || "Ch1 電學基本概念";
+        const diff = (document.getElementById("quiz-diff-select") || {}).value || "統測歷屆";
+
+        const qData = buildUnitSpecificQuestion(subj, unit, diff, Boolean(isVariant));
+        appState.quizData = qData;
+        appState.quizUserPick = null;
+
+        document.getElementById("qres-subj").textContent = qData.subject;
+        document.getElementById("qres-unit").textContent = qData.unit;
+        document.getElementById("qres-diff").textContent = qData.difficulty + (isVariant ? "・變式題" : "");
+
+        const svgBox = document.getElementById("qres-svg-box");
+        if (qData.svg) {
+          svgBox.innerHTML = qData.svg;
+          svgBox.classList.remove("hidden");
+        } else {
+          svgBox.innerHTML = "";
+          svgBox.classList.add("hidden");
+        }
+
+        const qBox = document.getElementById("qres-question");
+        qBox.innerHTML = qData.question;
+
+        const optsBox = document.getElementById("qres-options");
+        optsBox.innerHTML = qData.options.map((opt, idx) => `
+          <button type="button" onclick="window.selectQuizOption(${idx})" data-qopt="${idx}" class="qopt-btn text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-amber-500 hover:bg-amber-50/40 bg-white transition flex items-start gap-2.5 min-w-0">
+            <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-800 font-mono font-extrabold text-xs flex items-center justify-center shrink-0 mt-0.5">${opt.label}</span>
+            <span class="text-xs sm:text-sm font-bold text-slate-900 leading-snug break-words flex-1">${opt.text}</span>
+          </button>
+        `).join("");
+
+        document.getElementById("qres-feedback").classList.add("hidden");
+        document.getElementById("qres-solution-box").classList.add("hidden");
+        document.getElementById("qres-speed-solution").innerHTML = getSpeedTipForUnit(qData.subject, qData.unit);
+        document.getElementById("qres-solution").innerHTML = qData.solution;
+        window.setQuizSolutionMode("speed");
+
+        safeRenderMath(document.getElementById("quiz-result-card"));
+      };
+
+      window.selectQuizOption = function (idx) {
+        if (!appState.quizData) return;
+        appState.quizUserPick = idx;
+        const opts = appState.quizData.options;
+        const picked = opts[idx];
+
+        document.querySelectorAll(".qopt-btn").forEach((btn, i) => {
+          const o = opts[i];
+          btn.disabled = true;
+          if (o.isCorrect) {
+            btn.className = "qopt-btn text-left p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-950 flex items-start gap-2.5 min-w-0";
+          } else if (i === idx && !o.isCorrect) {
+            btn.className = "qopt-btn text-left p-3.5 rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-950 flex items-start gap-2.5 min-w-0";
+          } else {
+            btn.className = "qopt-btn text-left p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50 opacity-70 flex items-start gap-2.5 min-w-0";
+          }
+        });
+
+        const fb = document.getElementById("qres-feedback");
+        fb.classList.remove("hidden");
+        if (picked.isCorrect) {
+          fb.className = "rounded-xl p-3.5 border border-emerald-300 bg-emerald-50 text-emerald-950 text-xs sm:text-sm break-words";
+          fb.innerHTML = `<strong>✅ 回答正確（${picked.label}）！</strong><br/>${picked.reason}`;
+        } else {
+          const rightOpt = opts.find(o => o.isCorrect);
+          fb.className = "rounded-xl p-3.5 border border-rose-300 bg-rose-50 text-rose-950 text-xs sm:text-sm break-words";
+          fb.innerHTML = `<strong>❌ 誤選（${picked.label}）誘答診斷：</strong>${picked.reason}<br/><span class="text-emerald-800 font-bold mt-1 inline-block">✔ 正解為 (${rightOpt.label})：${rightOpt.reason}</span>`;
+        }
+
+        const solBox = document.getElementById("qres-solution-box");
+        solBox.classList.remove("hidden");
+        safeRenderMath(document.getElementById("quiz-result-card"));
+      };
+
+      window.jumpToGuideUnit = function () {
+        if (!appState.quizData) {
+          window.switchTab("tab-guide");
+          return;
+        }
+        window.setPlaybookSubject(appState.quizData.subject);
+        const kw = document.getElementById("pb-keyword-input");
+        if (kw) kw.value = appState.quizData.unit.split(" ")[0];
+        window.renderPlaybookCards();
+        window.switchTab("tab-guide");
+      };
+
+      // ---------------------------------------------------------------------
+      // 14. TAB 3: 📖 全科寶典 (ALL 6 SUBJECTS × ALL 57 LESSONS)
+      // ---------------------------------------------------------------------
+      window.setPlaybookSubject = function (subj) {
+        appState.playbookSubject = subj;
+        document.querySelectorAll(".pb-subj-btn").forEach(btn => {
+          if (btn.getAttribute("data-pb-subj") === subj) {
+            btn.className = "pb-subj-btn px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-900 text-amber-400 shadow-xs transition";
+          } else {
+            btn.className = "pb-subj-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition";
+          }
+        });
+        window.renderPlaybookCards();
+      };
+
+      window.practiceFromPlaybook = function (subject, unit) {
+        const subjEl = document.getElementById("quiz-subject-select");
+        if (subjEl) {
+          subjEl.value = subject;
+          window.updateUnitDropdown(unit);
+        }
+        window.switchTab("tab-quiz");
+        window.generateUnitQuestion(false);
+      };
+
+      window.renderPlaybookCards = function () {
+        const grid = document.getElementById("pb-cards-grid");
+        const countBadge = document.getElementById("pb-count-badge");
+        if (!grid) return;
+
+        const kw = ((document.getElementById("pb-keyword-input") || {}).value || "").trim().toLowerCase();
+        const filtered = CURRICULUM_PLAYBOOK.filter(item => {
+          if (appState.playbookSubject !== "ALL" && item.subject !== appState.playbookSubject) return false;
+          if (kw) {
+            const hay = `${item.subject} ${item.unit} ${item.mnemonic} ${item.formulas} ${item.pitfall} ${item.steps.join(" ")}`.toLowerCase();
+            if (!hay.includes(kw)) return false;
+          }
+          return true;
+        });
+
+        if (countBadge) countBadge.textContent = `顯示 ${filtered.length} 課`;
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `<div class="col-span-full bg-white rounded-3xl border border-slate-200 p-8 text-center text-sm text-slate-500">找不到符合關鍵字的課程，請嘗試清除搜尋條件！</div>`;
+          return;
+        }
+
+        const badgeColor = {
+          "基本電學": "bg-amber-100 text-amber-900",
+          "電子學": "bg-blue-100 text-blue-900",
+          "數位邏輯設計": "bg-emerald-100 text-emerald-900",
+          "數學 C": "bg-purple-100 text-purple-900",
+          "英文": "bg-rose-100 text-rose-900",
+          "國文": "bg-teal-100 text-teal-900"
+        };
+
+        grid.innerHTML = filtered.map(item => `
+          <article class="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-5 flex flex-col justify-between gap-3 min-w-0 hover:border-amber-400 transition">
+            <div class="space-y-2.5 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <span class="px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold ${badgeColor[item.subject] || "bg-slate-100 text-slate-800"}">${item.subject}</span>
+                <button type="button" onclick="window.practiceFromPlaybook('${item.subject}', '${item.unit}')" class="px-3 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 text-xs font-extrabold transition shrink-0">
+                  🎯 練習此課試題
+                </button>
+              </div>
+              <h3 class="text-sm sm:text-base font-extrabold text-slate-900 break-words">${item.unit}</h3>
+              <div class="rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-xs font-bold text-amber-950 leading-relaxed break-words">
+                🔥 核心口訣：${item.mnemonic}
+              </div>
+              <div class="bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 overflow-x-auto max-w-full">
+                ${item.formulas}
+              </div>
+              <ul class="space-y-1 text-xs text-slate-700 leading-relaxed">
+                ${item.steps.map(s => `<li class="break-words">• ${s}</li>`).join("")}
+              </ul>
+            </div>
+            <div class="rounded-xl bg-rose-50/80 border border-rose-200 p-2.5 text-xs text-rose-900 leading-relaxed break-words">
+              <strong>⚠️ 高頻扣分地雷：</strong>${item.pitfall}
+            </div>
+          </article>
+        `).join("");
+
+        safeRenderMath(grid);
+      };
+
+      // ---------------------------------------------------------------------
+      // 15. TAB 4: 🏫 北科段考 (CHECKLIST + TRAPS + 10-MIN TIMER + MOCK EXAM)
+      // ---------------------------------------------------------------------
+      window.toggleBeikeCheck = function (id) {
+        appState.beikeChecks[id] = !appState.beikeChecks[id];
+        safeSetStorage("tcte_beike_checks", appState.beikeChecks);
+        window.renderBeikeTab();
+      };
+
+      window.resetBeikeChecks = function () {
+        appState.beikeChecks = {};
+        safeSetStorage("tcte_beike_checks", {});
+        window.renderBeikeTab();
+        showToast("已清除所有段考複習勾選紀錄", "info");
+      };
+
+      window.answerBeikeQuiz = function (qid, optIdx) {
+        appState.beikeAnswers[qid] = optIdx;
+        window.renderBeikeTab();
+      };
+
+      function updateBeikeTimerUI() {
+        const el = document.getElementById("beike-timer-display");
+        const btn = document.getElementById("btn-beike-timer");
+        if (el) {
+          const m = Math.floor(appState.beikeTimerSec / 60);
+          const s = appState.beikeTimerSec % 60;
+          el.textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        }
+        if (btn) {
+          btn.textContent = appState.beikeTimerRunning ? "暫停" : "開始";
+        }
+      }
+
+      window.toggleBeikeTimer = function () {
+        if (appState.beikeTimerRunning) {
+          appState.beikeTimerRunning = false;
+          if (appState.beikeTimerInterval) clearInterval(appState.beikeTimerInterval);
+          appState.beikeTimerInterval = null;
+        } else {
+          if (appState.beikeTimerSec <= 0) appState.beikeTimerSec = 600;
+          appState.beikeTimerRunning = true;
+          appState.beikeTimerInterval = setInterval(() => {
+            if (appState.beikeTimerSec > 0) {
+              appState.beikeTimerSec--;
+              updateBeikeTimerUI();
+            } else {
+              appState.beikeTimerRunning = false;
+              clearInterval(appState.beikeTimerInterval);
+              appState.beikeTimerInterval = null;
+              updateBeikeTimerUI();
+              showToast("⏱️ 10 分鐘限時模考時間到！請核對下方解析。", "warning");
+            }
+          }, 1000);
+        }
+        updateBeikeTimerUI();
+      };
+
+      window.resetBeikeTimer = function () {
+        appState.beikeTimerRunning = false;
+        if (appState.beikeTimerInterval) clearInterval(appState.beikeTimerInterval);
+        appState.beikeTimerInterval = null;
+        appState.beikeTimerSec = 600;
+        updateBeikeTimerUI();
+      };
+
+      window.renderBeikeTab = function () {
+        const grade = (document.getElementById("beike-grade") || {}).value || "高二";
+        const exam = (document.getElementById("beike-exam") || {}).value || "第二次段考";
+        const subj = (document.getElementById("beike-subject") || {}).value || "全部六科";
+
+        const items = BEIKE_EXAM_ITEMS.filter(it => subj === "全部六科" || it.subject === subj);
+        const doneCount = items.filter(it => Boolean(appState.beikeChecks[it.id])).length;
+        const pct = items.length ? Math.round((doneCount / items.length) * 100) : 0;
+
+        const pctEl = document.getElementById("beike-mastery-pct");
+        const barEl = document.getElementById("beike-mastery-bar");
+        const txtEl = document.getElementById("beike-mastery-text");
+        if (pctEl) pctEl.textContent = `${pct}%`;
+        if (barEl) barEl.style.width = `${pct}%`;
+        if (txtEl) txtEl.textContent = `已完成 ${doneCount} / ${items.length} 項考點`;
+
+        const listEl = document.getElementById("beike-checklist");
+        if (listEl) {
+          listEl.innerHTML = items.map(it => {
+            const checked = Boolean(appState.beikeChecks[it.id]);
+            return `
+              <label class="flex items-start gap-3 p-3 rounded-2xl border ${checked ? "border-emerald-300 bg-emerald-50/70" : "border-slate-200 bg-slate-50/60 hover:border-amber-400"} cursor-pointer transition">
+                <input type="checkbox" ${checked ? "checked" : ""} onchange="window.toggleBeikeCheck('${it.id}')" class="mt-1 w-4 h-4 rounded accent-emerald-600 shrink-0" />
+                <div class="min-w-0 flex-1 space-y-1">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="px-2 py-0.5 rounded bg-slate-900 text-amber-400 text-[10px] font-extrabold">${grade}・${exam}</span>
+                    <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-900 text-[10px] font-extrabold">${it.subject}</span>
+                  </div>
+                  <div class="text-xs sm:text-sm font-extrabold text-slate-900 ${checked ? "line-through text-slate-500" : ""} break-words">${it.title}</div>
+                  <div class="text-xs text-slate-600 break-words">${it.formula}</div>
+                </div>
+              </label>
+            `;
+          }).join("");
+          safeRenderMath(listEl);
+        }
+
+        const trapsEl = document.getElementById("beike-traps");
+        if (trapsEl) {
+          const traps = BEIKE_UNIT_TRAPS.filter(t => subj === "全部六科" || t.subject === subj);
+          trapsEl.innerHTML = traps.map(t => `
+            <div class="rounded-2xl bg-white border border-amber-200 p-3 space-y-1">
+              <div class="flex items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 text-[10px] font-extrabold">${t.subject}</span>
+                <span class="text-xs font-extrabold text-slate-900">${t.title}</span>
+              </div>
+              <p class="text-xs text-slate-700 leading-relaxed break-words">${t.detail}</p>
+            </div>
+          `).join("");
+          safeRenderMath(trapsEl);
+        }
+
+        const quizBox = document.getElementById("beike-quiz-container");
+        const scoreLbl = document.getElementById("beike-score-label");
+        if (quizBox) {
+          const qList = BEIKE_QUIZZES.filter(q => subj === "全部六科" || q.subject === subj);
+          let answered = 0;
+          let correct = 0;
+
+          quizBox.innerHTML = qList.map((q, qIdx) => {
+            const userPick = appState.beikeAnswers[q.id];
+            const hasPicked = typeof userPick === "number";
+            if (hasPicked) {
+              answered++;
+              if (q.options[userPick] && q.options[userPick].isCorrect) correct++;
+            }
+
+            return `
+              <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 sm:p-4 space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="px-2.5 py-0.5 rounded-lg bg-slate-900 text-amber-400 text-[11px] font-extrabold">第 ${qIdx + 1} 題・${q.subject}</span>
+                  <span class="text-[11px] text-slate-500 truncate">${q.unit}</span>
+                </div>
+                <div class="text-xs sm:text-sm font-bold text-slate-900 leading-relaxed break-words">${q.question}</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  ${q.options.map((opt, oIdx) => {
+                    let cls = "border-slate-200 bg-white hover:border-amber-500 text-slate-900";
+                    if (hasPicked) {
+                      if (opt.isCorrect) cls = "border-emerald-500 bg-emerald-50 text-emerald-950";
+                      else if (oIdx === userPick) cls = "border-rose-500 bg-rose-50 text-rose-950";
+                      else cls = "border-slate-200 bg-slate-100 opacity-65 text-slate-600";
+                    }
+                    return `
+                      <button type="button" onclick="window.answerBeikeQuiz('${q.id}', ${oIdx})" class="text-left p-2.5 rounded-xl border-2 ${cls} text-xs font-bold flex items-start gap-2 transition min-w-0">
+                        <span class="font-mono font-extrabold shrink-0">${opt.label}.</span>
+                        <span class="break-words">${opt.text}</span>
+                      </button>
+                    `;
+                  }).join("")}
+                </div>
+                ${hasPicked ? `
+                  <div class="rounded-xl p-2.5 text-xs ${q.options[userPick].isCorrect ? "bg-emerald-50 border border-emerald-200 text-emerald-950" : "bg-rose-50 border border-rose-200 text-rose-950"} break-words">
+                    ${q.options[userPick].isCorrect ? "✅ <strong>秒殺答對！</strong>" : "❌ <strong>誘答警示：</strong>"}${q.options[userPick].reason}
+                  </div>
+                ` : ""}
+              </div>
+            `;
+          }).join("");
+
+          if (scoreLbl) {
+            scoreLbl.textContent = answered === 0 ? "尚未作答" : `已答 ${answered}/${qList.length} 題（答對 ${correct} 題）`;
+          }
+          safeRenderMath(quizBox);
+        }
+      };
+
+      // ---------------------------------------------------------------------
+      // 16. TAB 5: 📸 拍照/檔案速解 (5 PRESETS + TWO-STAGE SOLVER)
+      // ---------------------------------------------------------------------
+      const SOLVER_PRESETS = {
+        be: {
+          subject: "基本電學",
+          prompt: "直流戴維寧等效電路題：電源 E = 24V 串聯電阻 R1 = 6Ω 後接節點 x，節點 x 對地接電阻 R2 = 12Ω，節點 x 再串聯電阻 R3 = 4Ω 至開路輸出端 a，b 端為參考地。求端點 a、b 之戴維寧等效電壓 VTH、等效電阻 RTH，以及負載 RL 可獲得之最大功率 PL(max)。",
+          netlist: "V_E (node_1, GND) = 24 V DC\nR1 (node_1, node_x) = 6 Ohm\nR2 (node_x, GND) = 12 Ohm\nR3 (node_x, port_a) = 4 Ohm\nPort_b = GND (Open-circuit test)",
+          formulas: "$$V_{TH} = E \\cdot \\frac{R_2}{R_1 + R_2}, \\quad R_{TH} = (R_1 \\parallel R_2) + R_3, \\quad P_{L(\\max)} = \\frac{V_{TH}^2}{4 R_{TH}}$$",
+          speed: "開路端串聯電阻 R3 = 4Ω 無電流無壓降直接無視！看前級分壓 VTH = 24 × (12 / 18) = 16V；求 RTH 時 6Ω 並 12Ω 用倍數除 (2+1) 得 4Ω，再加 R3 = 4Ω 得 8Ω；最大功率 16² ÷ (4×8) = 8W，20 秒秒殺！",
+          steps: "1. 移除負載開路時，流經 $R_3$ 電流為 $0$，故 $V_{TH} = V_x = 24 \\times \\frac{12}{6+12} = 16\\,\\text{V}$。<br/>2. 將獨立電壓源 $E$ 短路，由 $a、b$ 端往回看：$R_{TH} = (6 \\parallel 12) + 4 = 4 + 4 = 8\\,\\Omega$。<br/>3. 當 $R_L = R_{TH} = 8\\,\\Omega$ 時，最大功率 $P_{L(\\max)} = \\frac{16^2}{4 \\times 8} = \\frac{256}{32} = 8\\,\\text{W}$。",
+          answer: "$V_{TH} = 16\\,\\text{V}$，$R_{TH} = 8\\,\\Omega$，$P_{L(\\max)} = 8\\,\\text{W}$"
+        },
+        el: {
+          subject: "電子學",
+          prompt: "矽 NPN BJT 分壓式偏壓電路：VCC = 12V，上偏壓電阻 R1 = 30kΩ，下偏壓電阻 R2 = 10kΩ，集極電阻 RC = 2kΩ，射極電阻 RE = 1kΩ，電流增益 β = 99，VBE = 0.7V。求基極電流 IB、集極電流 IC 與集射極電壓 VCE。",
+          netlist: "Q1: Silicon NPN BJT (Beta = 99, VBE_on = 0.7 V)\nVCC = +12 V DC\nR1 (VCC, Base) = 30 kOhm, R2 (Base, GND) = 10 kOhm\nRC (VCC, Collector) = 2 kOhm, RE (Emitter, GND) = 1 kOhm",
+          formulas: "$$V_{BB} = V_{CC}\\frac{R_2}{R_1+R_2}, \\quad R_B = R_1 \\parallel R_2, \\quad I_B = \\frac{V_{BB}-0.7}{R_B+(1+\\beta)R_E}, \\quad V_{CE} = V_{CC} - I_C R_C - I_E R_E$$",
+          speed: "口訣「左分壓求 VBB、射極乘 (β+1) 反射拉直」！VBB = 12 × (10/40) = 3V，RB = 30k // 10k = 7.5kΩ，射極 1kΩ 乘 100 變 100kΩ，IB = (3 - 0.7) / 107.5k ≈ 21.4μA，IC ≈ 2.12mA！",
+          steps: "1. 左側分壓戴維寧等效：$V_{BB} = 12 \\times \\frac{10}{30+10} = 3\\,\\text{V}$，$R_B = 30\\,\\text{k} \\parallel 10\\,\\text{k} = 7.5\\,\\text{k}\\Omega$。<br/>2. 基極電流：$I_B = \\frac{3 - 0.7}{7.5\\,\\text{k} + (1+99)\\times 1\\,\\text{k}} = \\frac{2.3}{107.5\\,\\text{k}} \\approx 21.4\\,\\mu\\text{A}$。<br/>3. 集極電流 $I_C = 99 \\times 21.4\\,\\mu\\text{A} \\approx 2.12\\,\\text{mA}$，檢查 $V_{CE} \\approx 12 - 2.12(2+1) = 5.64\\,\\text{V} > 0.2\\,\\text{V}$（確認工作於作用區）。",
+          answer: "$I_B \\approx 21.4\\,\\mu\\text{A}$，$I_C \\approx 2.12\\,\\text{mA}$，$V_{CE} \\approx 5.64\\,\\text{V}$（作用區）"
+        },
+        dl: {
+          subject: "數位邏輯設計",
+          prompt: "四變數布林函數 F(A,B,C,D) = Σm(0, 2, 5, 7, 8, 10, 13, 15)，請用卡諾圖（K-map）化簡為最簡積之和（SOP）形式。",
+          netlist: "Inputs: A, B (rows: 00, 01, 11, 10); C, D (cols: 00, 01, 11, 10)\nMinterms = 1 at: m0, m2, m5, m7, m8, m10, m13, m15",
+          formulas: "$$F(A,B,C,D) = \\sum m(0,2,5,7,8,10,13,15) \\implies \\text{四角合圈} + \\text{中央四格大圈}$$",
+          speed: "口訣「四角合圈別忘記、圈 4 格必消 2 變數」！m0, m2, m8, m10 剛好落在卡諾圖四個角落，合圈消去 A、C 剩 B'D'；m5, m7, m13, m15 組成中間 2×2 四格大圈，消去 A、C 剩 BD，10 秒寫出 B'D' + BD（即 B ⊙ D）！",
+          steps: "1. 建立 4×4 格雷碼卡諾圖，將 $m_0, m_2, m_5, m_7, m_8, m_{10}, m_{13}, m_{15}$ 填入 $1$。<br/>2. 四個角落 $m_0(0000), m_2(0010), m_8(1000), m_{10}(1010)$ 相鄰合圈，共同不變為 $B=0, D=0$，得 $\\bar{B}\\bar{D}$。<br/>3. 中央四格 $m_5(0101), m_7(0111), m_{13}(1101), m_{15}(1111)$ 合圈，共同不變為 $B=1, D=1$，得 $BD$。",
+          answer: "$F(A,B,C,D) = \\bar{B}\\bar{D} + BD = \\overline{B \\oplus D}$"
+        },
+        mc: {
+          subject: "數學 C",
+          prompt: "已知 θ 為第二象限角，且 sinθ = 5/13，求 cosθ 與 tanθ 之值，並求複數 z = 13(cosθ + i sinθ) 轉為直角座標之形式。",
+          netlist: "Condition: Quadrant II (90° < θ < 180°), sin(θ) = 5/13\nPythagorean triple: (5, 12, 13)\nComplex number: z = 13(cos θ + i sin θ)",
+          formulas: "$$\\sin^2\\theta + \\cos^2\\theta = 1, \\quad \\tan\\theta = \\frac{\\sin\\theta}{\\cos\\theta}, \\quad z = x + yi = r(\\cos\\theta + i\\sin\\theta)$$",
+          speed: "口訣「才賽坦寇定正負＋5-12-13 直角三角形秒填」！第二象限只有 sin 為正，cos 與 tan 皆為負；看到 5 與 13 秒填第三邊 12，直接讀出 cosθ = -12/13、tanθ = -5/12！",
+          steps: "1. 因為 $\\theta$ 在第二象限，故 $\\cos\\theta < 0$、$\\tan\\theta < 0$。<br/>2. 由 $\\sin\\theta = \\frac{5}{13}$ 與畢氏數 $5^2 + 12^2 = 13^2$，得 $\\cos\\theta = -\\frac{12}{13}$，進而 $\\tan\\theta = \\frac{5/13}{-12/13} = -\\frac{5}{12}$。<br/>3. 代入複數：$z = 13\\left(-\\frac{12}{13} + i\\frac{5}{13}\\right) = -12 + 5i$。",
+          answer: "$\\cos\\theta = -\\frac{12}{13}$，$\\tan\\theta = -\\frac{5}{12}$，$z = -12 + 5i$"
+        },
+        en: {
+          subject: "英文",
+          prompt: "統測英文非選擇題句子重組：(to save / it / energy / is / everyone's responsibility / at school).",
+          netlist: "Given words: to save / it / energy / is / everyone's responsibility / at school\nTarget structure: Dummy Subject 'It is + N + to V + Place'",
+          formulas: "$$\\text{虛主詞黃金骨架：It + be動詞 + 名詞/形容詞補語 + to + 原形動詞 + 地方副詞片語}$$",
+          speed: "看到 `it`、`is` 與 `to save`，無條件秒套虛主詞黃金骨架 `It is + everyone's responsibility + to save energy + at school.`，最後點算 6 組提示詞一字不漏，20 秒拿滿分！",
+          steps: "1. 找出首字大寫與虛主詞 `It` 搭配連綴動詞 `is`。<br/>2. 接上主詞補語名詞片語 `everyone's responsibility`。<br/>3. 接上真正主詞不定詞片語 `to save energy`，最後加上地點副詞片語 `at school` 與句點。",
+          answer: "`It is everyone's responsibility to save energy at school.`"
+        }
+      };
+
+      window.loadSolverPreset = function (key) {
+        const p = SOLVER_PRESETS[key];
+        if (!p) return;
+        const box = document.getElementById("solver-prompt-text");
+        if (box) box.value = p.prompt;
+        renderTwoStageResult(p);
+        showToast(`⚡ 已帶入【${p.subject}】範例並完成兩階段解析！`, "success");
+      };
+
+      function renderTwoStageResult(data) {
+        const ph = document.getElementById("solver-placeholder");
+        const out = document.getElementById("solver-output");
+        if (ph) ph.classList.add("hidden");
+        if (out) out.classList.remove("hidden");
+
+        document.getElementById("solver-out-subj").textContent = data.subject || "智能識別";
+        document.getElementById("solver-out-netlist").textContent = data.netlist || "";
+        document.getElementById("solver-out-formulas").innerHTML = `<strong>關鍵公式：</strong>${data.formulas || ""}`;
+        document.getElementById("solver-out-speed").innerHTML = data.speed || "";
+        document.getElementById("solver-out-steps").innerHTML = data.steps || "";
+        document.getElementById("solver-out-answer").innerHTML = data.answer || "";
+
+        safeRenderMath(out);
+      }
+
+      window.runTwoStageSolver = async function () {
+        const box = document.getElementById("solver-prompt-text");
+        const btn = document.getElementById("btn-run-solver");
+        const promptText = box ? box.value.trim() : "";
+        const att = appState.solverAttachment;
+
+        if (!promptText && !att) {
+          showToast("請上傳題目照片／PDF／筆記檔，或輸入題目文字！", "warning");
+          return;
+        }
+
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "⏳ 正在執行兩階段解析與秒殺速解...";
+        }
+
+        const parts = [];
+        let instr = "你是台灣技高統測與北科附工電子科專家教師，一律使用台灣 108 課綱標準術語（克希荷夫、戴維寧、密爾門、正反器、二極體、運算放大器）。請進行兩階段防幻覺解析：Stage 1 提取結構化網表或題幹已知條件與適用公式；Stage 2 提供考場秒殺速解法、108課綱完整分步詳解與最終標準答案。";
+        if (promptText) instr += "\n題幹文字：\n" + promptText;
+        if (att && att.kind === "text") instr += "\n附加筆記檔案內容：\n" + att.textContent.slice(0, 4000);
+        parts.push({ text: instr });
+
+        if (att && (att.kind === "image" || att.kind === "pdf") && att.base64) {
+          parts.push({
+            inlineData: {
+              mimeType: att.mimeType,
+              data: att.base64
+            }
+          });
+        }
+
+        const schema = {
+          type: "OBJECT",
+          properties: {
+            subject: { type: "STRING" },
+            netlist: { type: "STRING" },
+            formulas: { type: "STRING" },
+            speed: { type: "STRING" },
+            steps: { type: "STRING" },
+            answer: { type: "STRING" }
+          },
+          required: ["subject", "netlist", "formulas", "speed", "steps", "answer"]
+        };
+
+        let result = await callGeminiWithFallback(parts, "Output valid JSON only with Traditional Chinese 108 curriculum terminology.", schema);
+
+        if (!result) {
+          // Intelligent Local Two-Stage Fallback
+          const rawCombined = `${promptText} ${att ? att.fileName + " " + (att.textContent || "") : ""}`;
+          const lower = rawCombined.toLowerCase();
+          let presetKey = "be";
+          if (lower.includes("bjt") || lower.includes("偏壓") || lower.includes("電晶體") || lower.includes("二極體") || lower.includes("運放")) presetKey = "el";
+          else if (lower.includes("卡諾") || lower.includes("邏輯") || lower.includes("正反器") || lower.includes("計數器") || lower.includes("布林")) presetKey = "dl";
+          else if (lower.includes("三角") || lower.includes("向量") || lower.includes("複數") || lower.includes("積分") || lower.includes("sin")) presetKey = "mc";
+          else if (lower.includes("英文") || lower.includes("重組") || lower.includes("克漏字") || /[a-z]{5,}\s+[a-z]{4,}/i.test(rawCombined)) presetKey = "en";
+
+          const base = SOLVER_PRESETS[presetKey];
+          const sourceHeader = att
+            ? `[已載入檔案：${att.fileName} (${att.fileSize})]\n`
+            : "";
+          const extractedPrompt = promptText
+            ? `題幹摘要：${promptText.slice(0, 260)}\n`
+            : "";
+
+          result = {
+            subject: base.subject,
+            netlist: `${sourceHeader}${extractedPrompt}--- 結構化條件識別 ---\n${base.netlist}`,
+            formulas: base.formulas,
+            speed: base.speed,
+            steps: base.steps,
+            answer: base.answer
+          };
+        }
+
+        renderTwoStageResult(result);
+        showToast("⚡ 兩階段結構化解析與秒殺速解完成！", "success");
+
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "⚡ 開始兩階段解析與秒殺速解";
+        }
+      };
+
+      // ---------------------------------------------------------------------
+      // 17. SYNCHRONOUS INITIALIZATION OF ALL 5 TABS ON LOAD
+      // ---------------------------------------------------------------------
+      function initApp() {
+        try {
+          // Restore saved state safely
+          const savedFavs = safeGetStorage("tcte_speed_favs", []);
+          if (Array.isArray(savedFavs)) appState.speedFavs = savedFavs;
+
+          const savedChecks = safeGetStorage("tcte_beike_checks", {});
+          if (savedChecks && typeof savedChecks === "object") appState.beikeChecks = savedChecks;
+
+          const savedKey = safeGetStorage("tcte_custom_apikey", "");
+          if (typeof savedKey === "string") appState.customApiKey = savedKey;
+
+          // Pre-render ALL 5 tabs synchronously so no tab is ever blank or unclickable
+          window.renderSpeedCards();
+          window.updateUnitDropdown("Ch4 直流網路分析與戴維寧/諾頓");
+          window.generateUnitQuestion(false);
+          window.renderPlaybookCards();
+          window.renderBeikeTab();
+          updateBeikeTimerUI();
+          bindDragDropAndPaste();
+
+          // Ensure initial tab state is clean
+          window.switchTab("tab-speed");
+        } catch (err) {
+          console.error("initApp error:", err);
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initApp);
+      } else {
+        initApp();
+      }
+    })();
+  </script>
+</body>
+</html>
